@@ -9,9 +9,7 @@ SDG 11 – Sustainable Cities and Communities
 This project empowers communities to report and track urban incidents efficiently, promoting safer, more inclusive, and sustainable urban environments through better incident management and resolution tracking.
 
 👥 Group Members
-Ysmael Pasion
-Mark Lloyd Yadao
-Ken Langgook
+
 
 Last updated: May 7, 2026
 

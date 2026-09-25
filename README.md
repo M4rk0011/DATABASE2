@@ -37,9 +37,9 @@ Notifications: Optional alerts for updates (planned)
 
 🚀 Local Setup Instructions
 Clone the repository
-git clone https://github.com/KenLanggook/appdev1-sdg11-Incident-Report-System.git
+git clone 
 Navigate to the project folder
-cd appdev1-sdg11-Incident-Report-System
+cd 
 Install dependencies
 npm install
 Run the Angular development server

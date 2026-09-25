@@ -1,0 +1,128 @@
+<div class="analytics-page">
+  <div class="page-header">
+    <h2>Analytics Dashboard</h2>
+    <p>Track your art commission business performance and insights</p>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <h3>Total Revenue</h3>
+      <div class="metric-value">${{ stats.totalRevenue }}</div>
+      <div class="metric-change positive">+12% from last month</div>
+    </div>
+    
+    <div class="metric-card">
+      <h3>Active Commissions</h3>
+      <div class="metric-value">{{ stats.inProgress }}</div>
+      <div class="metric-change neutral">Same as last week</div>
+    </div>
+    
+    <div class="metric-card">
+      <h3>Completion Rate</h3>
+      <div class="metric-value">{{ getCompletionRate() | number:'1.1' }}%</div>
+      <div class="metric-change positive">+5% improvement</div>
+    </div>
+    
+    <div class="metric-card">
+      <h3>Average Commission Value</h3>
+      <div class="metric-value">${{ getAverageCommissionValue() | number:'1.0' }}</div>
+      <div class="metric-change positive">+$50 increase</div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section">
+    <div class="chart-container">
+      <h3>Commission Status Distribution</h3>
+      <div class="status-chart">
+        <div class="chart-item" *ngFor="let item of statusData | keyvalue">
+          <div class="chart-bar">
+            <div class="bar-fill" [style.width.%]="(item.value / stats.total * 100)"></div>
+          </div>
+          <div class="chart-label">
+            <span class="label-text">{{ item.key }}</span>
+            <span class="label-value">{{ item.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Artwork Type Distribution</h3>
+      <div class="type-chart">
+        <div class="chart-item" *ngFor="let item of artworkTypeData | keyvalue">
+          <div class="chart-bar">
+            <div class="bar-fill" [style.width.%]="(item.value / stats.total * 100)"></div>
+          </div>
+          <div class="chart-label">
+            <span class="label-text">{{ item.key }}</span>
+            <span class="label-value">{{ item.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Trends -->
+  <div class="trends-section">
+    <h3>Monthly Performance Trends</h3>
+    <div class="trends-grid">
+      <div class="trend-card">
+        <h4>Revenue Trend</h4>
+        <div class="trend-chart">
+          <div class="trend-item" *ngFor="let month of monthlyData">
+            <div class="trend-bar">
+              <div class="trend-fill" [style.height.%]="(month.revenue / 2000 * 100)"></div>
+            </div>
+            <span class="trend-label">{{ month.month }}</span>
+            <span class="trend-value">${{ month.revenue }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="trend-card">
+        <h4>Commission Volume</h4>
+        <div class="trend-chart">
+          <div class="trend-item" *ngFor="let month of monthlyData">
+            <div class="trend-bar">
+              <div class="trend-fill volume" [style.height.%]="(month.commissions / 10 * 100)"></div>
+            </div>
+            <span class="trend-label">{{ month.month }}</span>
+            <span class="trend-value">{{ month.commissions }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Insights -->
+  <div class="insights-section">
+    <h3>Performance Insights</h3>
+    <div class="insights-grid">
+      <div class="insight-card">
+        <div class="insight-icon">trending_up</div>
+        <h4>Revenue Growth</h4>
+        <p>Your monthly revenue has increased by 23% compared to the previous quarter. Keep up the great work!</p>
+      </div>
+      
+      <div class="insight-card">
+        <div class="insight-icon">schedule</div>
+        <h4>Completion Time</h4>
+        <p>Average commission completion time is 2.3 weeks, which is 15% faster than your baseline.</p>
+      </div>
+      
+      <div class="insight-card">
+        <div class="insight-icon">star</div>
+        <h4>Client Satisfaction</h4>
+        <p>95% of clients have completed multiple commissions, indicating high satisfaction levels.</p>
+      </div>
+      
+      <div class="insight-card">
+        <div class="insight-icon">category</div>
+        <h4>Popular Services</h4>
+        <p>Digital Art and Portrait commissions are your most requested services, representing 60% of all work.</p>
+      </div>
+    </div>
+  </div>
+</div>

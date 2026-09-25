@@ -1,0 +1,128 @@
+<div class="incident-list-container">
+  <div class="page-header">
+    <h2>All Incidents</h2>
+    <a routerLink="/report" class="btn btn-primary">Report New Incident</a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="search">Search:</label>
+        <input 
+          type="text" 
+          id="search" 
+          [(ngModel)]="searchTerm" 
+          name="search"
+          (input)="onFilterChange()"
+          placeholder="Search incidents..."
+        >
+      </div>
+      
+      <div class="filter-group">
+        <label for="status">Status:</label>
+        <select id="status" [(ngModel)]="statusFilter" name="statusFilter" (change)="onFilterChange()">
+          <option value="">All Statuses</option>
+          <option *ngFor="let status of statuses" [value]="status">
+            {{ status.replace('_', ' ').toUpperCase() }}
+          </option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="severity">Severity:</label>
+        <select id="severity" [(ngModel)]="severityFilter" name="severityFilter" (change)="onFilterChange()">
+          <option value="">All Severities</option>
+          <option *ngFor="let severity of severities" [value]="severity">
+            {{ severity.toUpperCase() }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <p>Loading incidents...</p>
+  </div>
+
+  <!-- Incidents List -->
+  <ng-container *ngIf="incidents$ | async as incidents">
+    <div class="incidents-grid" *ngIf="!isLoading && incidents.length > 0">
+      <div class="incident-card" *ngFor="let incident of incidents">
+        <div class="card-header">
+          <h3>{{ incident.title }}</h3>
+          <div class="incident-badges">
+            <span class="severity-badge" [style.background-color]="getSeverityColor(incident.severity)">
+              {{ incident.severity.toUpperCase() }}
+            </span>
+            <span class="status-badge" [style.background-color]="getStatusColor(incident.status)">
+              {{ incident.status.replace('_', ' ').toUpperCase() }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <p class="incident-description">{{ incident.description }}</p>
+          
+          <div class="incident-details">
+            <div class="detail-item">
+              <span class="label">Category:</span>
+              <span class="value">{{ incident.category.replace('_', ' ').toUpperCase() }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Location:</span>
+              <span class="value">{{ incident.location.address }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Reported:</span>
+              <span class="value">{{ incident.reportedAt | date:'medium' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Reporter:</span>
+              <span class="value">{{ incident.isAnonymous ? 'Anonymous' : incident.contactInfo.name }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <a [routerLink]="['/incidents', incident.id]" class="btn btn-outline-primary">View Details</a>
+          <button
+            type="button"
+            class="btn btn-primary"
+            *ngIf="canEditIncidentContent(incident)"
+            (click)="goToEditIncident(incident, $event)"
+          >
+            Edit
+          </button>
+
+          <div class="status-actions" *ngIf="canUpdateStatus()">
+            <select 
+              class="status-select" 
+              [value]="incident.status" 
+              (change)="updateIncidentStatus(incident.id, $any($event.target).value)"
+            >
+              <option *ngFor="let status of statuses" [value]="status">
+                {{ status.replace('_', ' ').toUpperCase() }}
+              </option>
+            </select>
+          </div>
+          
+          <button 
+            class="btn btn-danger" 
+            *ngIf="canDeleteIncident()" 
+            (click)="deleteIncident(incident.id)"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && incidents.length === 0">
+      <p>No incidents found.</p>
+      <a routerLink="/report" class="btn btn-primary">Report First Incident</a>
+    </div>
+  </ng-container>
+</div>

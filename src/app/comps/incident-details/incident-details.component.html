@@ -1,0 +1,189 @@
+<div class="incident-details-container" *ngIf="!isLoading; else loading">
+  <div *ngIf="incident; else noIncident">
+    <div class="page-header">
+      <button class="btn btn-outline" (click)="goBack()">Back to Incidents</button>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="editIncident()" *ngIf="canEditIncidentRecord()">Edit</button>
+        <button class="btn btn-info" (click)="printIncident()" *ngIf="isAdmin">
+          🖨️ Print
+        </button>
+        <button class="btn btn-success" (click)="downloadIncidentPDF()" *ngIf="isAdmin">
+          📄 PDF
+        </button>
+        <button class="btn btn-warning" (click)="shareIncidentReport()" *ngIf="isAdmin">
+          📧 Share
+        </button>
+        <button class="btn btn-danger" (click)="deleteIncident()" *ngIf="canDeleteIncident()">Delete</button>
+      </div>
+    </div>
+
+    <div class="incident-content">
+      <div class="main-section">
+        <div class="incident-header">
+          <h1>{{ incident.title }}</h1>
+          <div class="incident-badges">
+            <span class="severity-badge" [style.background-color]="getSeverityColor(incident.severity)">
+              {{ incident.severity.toUpperCase() }}
+            </span>
+            <span class="status-badge" [style.background-color]="getStatusColor(incident.status)">
+              {{ incident.status.replace('_', ' ').toUpperCase() }}
+            </span>
+          </div>
+        </div>
+
+        <div class="incident-description">
+          <h3>Description</h3>
+          <p>{{ incident.description }}</p>
+        </div>
+
+        <div class="incident-info">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Category:</span>
+              <span class="value">{{ incident.category.replace('_', ' ').toUpperCase() }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Severity:</span>
+              <span class="value severity" [style.color]="getSeverityColor(incident.severity)">
+                {{ incident.severity.toUpperCase() }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="label">Status:</span>
+              <span class="value status" [style.color]="getStatusColor(incident.status)">
+                {{ incident.status.replace('_', ' ').toUpperCase() }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="label">Reported:</span>
+              <span class="value">{{ incident.reportedAt | date:'full' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Updated:</span>
+              <span class="value">{{ incident.updatedAt | date:'full' }}</span>
+            </div>
+            <div class="info-item" *ngIf="incident.resolvedAt">
+              <span class="label">Resolved:</span>
+              <span class="value">{{ incident.resolvedAt | date:'full' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="location-info">
+          <h3>Location</h3>
+          <div class="location-details">
+            <p><strong>Address:</strong> {{ incident.location.address }}</p>
+            <p *ngIf="incident.location.building"><strong>Building:</strong> {{ incident.location.building }}</p>
+            <p *ngIf="incident.location.floor"><strong>Floor:</strong> {{ incident.location.floor }}</p>
+            <p *ngIf="incident.location.room"><strong>Room:</strong> {{ incident.location.room }}</p>
+            <p *ngIf="incident.location.landmark"><strong>Landmark:</strong> {{ incident.location.landmark }}</p>
+            <p><strong>Coordinates:</strong> {{ incident.location.latitude.toFixed(6) }}, {{ incident.location.longitude.toFixed(6) }}</p>
+          </div>
+        </div>
+
+        <div class="contact-info" *ngIf="!incident.isAnonymous || isAdmin">
+          <h3>Contact Information</h3>
+          <div class="contact-details">
+            <p><strong>Name:</strong> {{ incident.isAnonymous ? 'Anonymous Reporter' : incident.contactInfo.name }}</p>
+            <p><strong>Email:</strong> {{ incident.contactInfo.email }}</p>
+            <p *ngIf="incident.contactInfo.phone"><strong>Phone:</strong> {{ incident.contactInfo.phone }}</p>
+            <p *ngIf="incident.contactInfo.studentId"><strong>Student ID:</strong> {{ incident.contactInfo.studentId }}</p>
+            <p *ngIf="incident.contactInfo.department"><strong>Department:</strong> {{ incident.contactInfo.department }}</p>
+          </div>
+        </div>
+
+        <div class="witnesses-info" *ngIf="incident.witnesses.length > 0">
+          <h3>Witnesses</h3>
+          <ul>
+            <li *ngFor="let witness of incident.witnesses">{{ witness }}</li>
+          </ul>
+        </div>
+
+        <div class="additional-notes" *ngIf="incident.additionalNotes">
+          <h3>Additional Notes</h3>
+          <p>{{ incident.additionalNotes }}</p>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="status-actions" *ngIf="canUpdateStatus()">
+          <h3>Status Actions</h3>
+          <div class="action-buttons">
+            <button 
+              *ngIf="incident.status === 'reported'" 
+              class="btn btn-primary" 
+              (click)="updateStatus(IncidentStatus.INVESTIGATING)"
+            >
+              Start Investigation
+            </button>
+            <button 
+              *ngIf="incident.status === 'investigating'" 
+              class="btn btn-success" 
+              (click)="updateStatus(IncidentStatus.RESOLVED)"
+            >
+              Mark Resolved
+            </button>
+            <button 
+              *ngIf="incident.status === 'investigating'" 
+              class="btn btn-warning" 
+              (click)="updateStatus(IncidentStatus.FALSE_ALARM)"
+            >
+              Mark as False Alarm
+            </button>
+            <button 
+              *ngIf="incident.status === 'resolved'" 
+              class="btn btn-secondary" 
+              (click)="updateStatus(IncidentStatus.CLOSED)"
+            >
+              Close Case
+            </button>
+          </div>
+        </div>
+
+        <div class="incident-summary">
+          <h3>Incident Summary</h3>
+          <div class="summary-stats">
+            <div class="stat-item">
+              <span class="stat-label">Incident ID:</span>
+              <span class="stat-value">#{{ incident.id }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Reporter:</span>
+              <span class="stat-value">{{ incident.isAnonymous ? 'Anonymous' : incident.contactInfo.name }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Assigned To:</span>
+              <span class="stat-value">{{ incident.assignedTo || 'Unassigned' }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Time Elapsed:</span>
+              <span class="stat-value">{{ getTimeElapsed(incident.reportedAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <h3>Quick Actions</h3>
+          <div class="action-buttons">
+            <button class="btn btn-outline-primary">Print Report</button>
+            <button class="btn btn-outline-primary">Export PDF</button>
+            <button class="btn btn-outline-primary">Share Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="loading">
+    <p>Loading incident details...</p>
+  </div>
+</ng-template>
+
+<ng-template #noIncident>
+  <div class="not-found">
+    <p>Incident not found.</p>
+    <button class="btn btn-primary" (click)="goBack()">Back to Incidents</button>
+  </div>
+</ng-template>

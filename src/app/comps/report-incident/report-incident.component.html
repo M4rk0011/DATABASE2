@@ -1,0 +1,276 @@
+<div class="report-incident-container">
+  <div class="report-header">
+    <h1>Report New Incident</h1>
+    <p>Fill in the details below to report an incident at University of Baguio</p>
+  </div>
+
+  <form class="incident-form" (ngSubmit)="onSubmit()">
+    <!-- Basic Information -->
+    <div class="form-section">
+      <h2>Incident Details</h2>
+      
+      <div class="form-group">
+        <label for="title">Incident Title *</label>
+        <input 
+          type="text" 
+          id="title" 
+          [(ngModel)]="incidentData.title" 
+          name="title"
+          placeholder="Brief description of the incident"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="description">Detailed Description *</label>
+        <textarea 
+          id="description" 
+          [(ngModel)]="incidentData.description" 
+          name="description"
+          rows="4"
+          placeholder="Provide a detailed description of what happened"
+          required
+        ></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Category *</label>
+          <select id="category" [(ngModel)]="incidentData.category" name="category" required>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category.replace('_', ' ').toUpperCase() }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="severity">Severity *</label>
+          <select id="severity" [(ngModel)]="incidentData.severity" name="severity" required>
+            <option *ngFor="let severity of severities" [value]="severity">
+              {{ severity.toUpperCase() }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Information -->
+    <div class="form-section">
+      <h2>Location Information</h2>
+      
+      <div class="form-group">
+        <label for="address">Location Address *</label>
+        <input 
+          type="text" 
+          id="address" 
+          [(ngModel)]="incidentData.location.address" 
+          name="address"
+          placeholder="e.g., University of Baguio Main Library, 2nd Floor"
+          required
+        >
+      </div>
+
+      <div class="quick-locations">
+        <label>Quick Locations (address only — use the map below to set the pin):</label>
+        <div class="location-buttons">
+          <button type="button" class="btn btn-outline" (click)="setQuickLocation('Main Library')">Main Library</button>
+          <button type="button" class="btn btn-outline" (click)="setQuickLocation('Gymnasium')">Gymnasium</button>
+          <button type="button" class="btn btn-outline" (click)="setQuickLocation('Parking Lot')">Parking Lot</button>
+          <button type="button" class="btn btn-outline" (click)="setQuickLocation('Administration')">Administration</button>
+          <button type="button" class="btn btn-outline" (click)="setQuickLocation('Cafeteria')">Cafeteria</button>
+        </div>
+      </div>
+
+      <div class="map-section">
+        <label class="map-label">Pin location on campus map *</label>
+        <p class="map-hint">The red outline is the campus reporting area (around 16°24′56″N 120°35′51″E). Click the map or drag the pin to set the exact location; coordinates are saved with your report.</p>
+        <div id="report-map" class="report-leaflet-map" role="application" aria-label="Campus map to select incident location"></div>
+        <p class="coordinates-readout">
+          Latitude {{ incidentData.location.latitude | number:'1.5-5' }},
+          longitude {{ incidentData.location.longitude | number:'1.5-5' }}
+        </p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="building">Building</label>
+          <input 
+            type="text" 
+            id="building" 
+            [(ngModel)]="incidentData.location.building" 
+            name="building"
+            placeholder="e.g., Main Library"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="floor">Floor</label>
+          <input 
+            type="text" 
+            id="floor" 
+            [(ngModel)]="incidentData.location.floor" 
+            name="floor"
+            placeholder="e.g., 2nd Floor"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="room">Room/Area</label>
+          <input 
+            type="text" 
+            id="room" 
+            [(ngModel)]="incidentData.location.room" 
+            name="room"
+            placeholder="e.g., Study Area A"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="landmark">Nearby Landmark</label>
+          <input 
+            type="text" 
+            id="landmark" 
+            [(ngModel)]="incidentData.location.landmark" 
+            name="landmark"
+            placeholder="e.g., Near entrance gate"
+          >
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Contact Information -->
+    <div class="form-section">
+      <h2>Contact Information</h2>
+      
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="incidentData.isAnonymous" name="isAnonymous">
+          Report anonymously
+        </label>
+      </div>
+
+      <div *ngIf="!incidentData.isAnonymous">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactName">Your Name *</label>
+            <input 
+              type="text" 
+              id="contactName" 
+              [(ngModel)]="incidentData.contactInfo.name" 
+              name="contactName"
+              placeholder="Your full name"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="contactEmail">Email Address *</label>
+            <input 
+              type="email" 
+              id="contactEmail" 
+              [(ngModel)]="incidentData.contactInfo.email" 
+              name="contactEmail"
+              placeholder="your.email@ub.edu.ph"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactPhone">Phone Number</label>
+            <input 
+              type="tel" 
+              id="contactPhone" 
+              [(ngModel)]="incidentData.contactInfo.phone" 
+              name="contactPhone"
+              placeholder="+63-XXX-XXX-XXXX"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="studentId">Student ID</label>
+            <input 
+              type="text" 
+              id="studentId" 
+              [(ngModel)]="incidentData.contactInfo.studentId" 
+              name="studentId"
+              placeholder="e.g., 2024-12345"
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department</label>
+          <input 
+            type="text" 
+            id="department" 
+            [(ngModel)]="incidentData.contactInfo.department" 
+            name="department"
+            placeholder="e.g., College of Engineering"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Witnesses -->
+    <div class="form-section">
+      <h2>Witnesses</h2>
+      
+      <div class="witness-input-group">
+        <input 
+          type="text" 
+          [(ngModel)]="witnessInput" 
+          name="witnessInput"
+          placeholder="Enter witness name"
+          (keyup.enter)="addWitness()"
+        >
+        <button type="button" class="btn btn-outline" (click)="addWitness()">Add Witness</button>
+      </div>
+
+      <div class="witnesses-list" *ngIf="incidentData.witnesses.length > 0">
+        <div class="witness-item" *ngFor="let witness of incidentData.witnesses; let i = index">
+          <span>{{ witness }}</span>
+          <button type="button" class="btn-remove" (click)="removeWitness(i)">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="form-section">
+      <h2>Additional Information</h2>
+      
+      <div class="form-group">
+        <label for="additionalNotes">Additional Notes</label>
+        <textarea 
+          id="additionalNotes" 
+          [(ngModel)]="incidentData.additionalNotes" 
+          name="additionalNotes"
+          rows="3"
+          placeholder="Any additional information that might be helpful"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <div class="success-message" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <div class="action-buttons">
+        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Submit Report' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,81 @@
+<div class="dashboard">
+  <h2>Art Commission Dashboard</h2>
+  <p class="subtitle">Manage your freelance art business efficiently</p>
+  
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>Total Commissions</h3>
+      <div class="stat-number">{{ stats.total }}</div>
+      <div class="stat-label">Active Projects</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>In Progress</h3>
+      <div class="stat-number">{{ stats.inProgress }}</div>
+      <div class="stat-label">Currently Working</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>Completed</h3>
+      <div class="stat-number">{{ stats.completed }}</div>
+      <div class="stat-label">Finished Projects</div>
+    </div>
+    
+    <div class="stat-card">
+      <h3>Total Revenue</h3>
+      <div class="stat-number">${{ stats.totalRevenue }}</div>
+      <div class="stat-label">All Time Earnings</div>
+    </div>
+  </div>
+  
+  <!-- Recent Commissions -->
+  <div class="recent-section">
+    <h3>Recent Commissions</h3>
+    <div class="commission-list" *ngIf="recentCommissions.length > 0">
+      <div class="commission-item" *ngFor="let commission of recentCommissions">
+        <div class="commission-header">
+          <h4>{{ commission.title }}</h4>
+          <span class="status" [class]="'status-' + commission.status">
+            {{ commission.status.replace('_', ' ').toUpperCase() }}
+          </span>
+        </div>
+        <div class="commission-details">
+          <p><strong>Client:</strong> {{ commission.clientName }}</p>
+          <p><strong>Price:</strong> ${{ commission.price }}</p>
+          <p><strong>Progress:</strong> {{ commission.progress }}%</p>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="commission.progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="recentCommissions.length === 0">
+      <p>No commissions yet. Start by creating your first commission!</p>
+    </div>
+  </div>
+  
+  <!-- SDG 8 Information -->
+  <div class="sdg-section">
+    <h3>SDG 8 Impact</h3>
+    <div class="sdg-content">
+      <p>This system supports <strong>SDG 8 - Decent Work and Economic Growth</strong> by:</p>
+      <ul>
+        <li>Enabling sustainable income opportunities for freelance artists</li>
+        <li>Promoting productivity and efficient workflow management</li>
+        <li>Supporting entrepreneurship in the creative economy</li>
+        <li>Facilitating fair client relationships and payment tracking</li>
+      </ul>
+      <div class="impact-metrics">
+        <div class="metric">
+          <span class="metric-value">{{ stats.total }}</span>
+          <span class="metric-label">Projects Managed</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">${{ stats.totalRevenue }}</span>
+          <span class="metric-label">Economic Impact</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,165 @@
+<div class="sdg-impact-page">
+  <div class="page-header">
+    <div class="sdg-header">
+      <div class="sdg-icon">
+        <img src="https://sdgs.un.org/sites/default/files/2023-03/E_SDG_Icons-08.jpg" alt="SDG 8 Icon" />
+      </div>
+      <div class="sdg-info">
+        <h2>SDG 8 Impact Dashboard</h2>
+        <h3>Decent Work and Economic Growth</h3>
+        <p>Tracking your contribution to sustainable economic development through art commission management</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Impact Overview -->
+  <div class="impact-overview">
+    <h3>Economic Impact Overview</h3>
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-icon">monetization_on</div>
+        <h4>Total Revenue Generated</h4>
+        <div class="impact-value">${{ impactMetrics.totalRevenue }}</div>
+        <div class="impact-desc">Direct economic contribution</div>
+      </div>
+
+      <div class="impact-card">
+        <div class="impact-icon">work</div>
+        <h4>Jobs Supported</h4>
+        <div class="impact-value">{{ impactMetrics.jobsSupported }}</div>
+        <div class="impact-desc">Estimated employment opportunities</div>
+      </div>
+
+      <div class="impact-card">
+        <div class="impact-icon">trending_up</div>
+        <h4>Productivity Gain</h4>
+        <div class="impact-value">{{ impactMetrics.productivityGain }} hours</div>
+        <div class="impact-desc">Time saved through efficient management</div>
+      </div>
+
+      <div class="impact-card">
+        <div class="impact-icon">business</div>
+        <h4>Entrepreneurship Support</h4>
+        <div class="impact-value">{{ impactMetrics.entrepreneurshipSupport }}</div>
+        <div class="impact-desc">Business activities enabled</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SDG Targets Progress -->
+  <div class="targets-section">
+    <h3>SDG 8 Targets Progress</h3>
+    <div class="targets-grid">
+      <div class="target-card" *ngFor="let target of getSdgTargets()" [class.achieved]="target.achieved">
+        <div class="target-header">
+          <span class="target-number">{{ target.target }}</span>
+          <span class="target-status" [class.completed]="target.achieved">
+            {{ target.achieved ? 'Achieved' : 'In Progress' }}
+          </span>
+        </div>
+        <p class="target-description">{{ target.description }}</p>
+        <div class="progress-indicator">
+          <div class="progress-bar">
+            <div class="progress-fill" [class.completed]="target.achieved" 
+                 [style.width.%]="target.achieved ? 100 : 60"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Impact Details -->
+  <div class="impact-details">
+    <div class="detail-section">
+      <h3>Economic Growth Contribution</h3>
+      <div class="detail-content">
+        <div class="metric-row">
+          <span class="metric-label">Average Commission Value:</span>
+          <span class="metric-value">${{ impactMetrics.averageIncome | number:'1.0' }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Sustainable Income per Project:</span>
+          <span class="metric-value">${{ impactMetrics.sustainableIncome | number:'1.0' }}</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Local Economy Contribution:</span>
+          <span class="metric-value">${{ impactMetrics.economicGrowthContribution | number:'1.0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>Social Impact Metrics</h3>
+      <div class="detail-content">
+        <div class="impact-story">
+          <h4>Your Contribution to Decent Work</h4>
+          <p>By managing {{ stats.total }} art commissions, you're creating sustainable income opportunities for freelance artists. Each completed project represents not just artistic expression, but economic empowerment and professional development in the creative economy.</p>
+        </div>
+        
+        <div class="impact-story">
+          <h4>Productivity and Efficiency</h4>
+          <p>Your systematic approach to commission management has saved approximately {{ impactMetrics.productivityGain }} hours of administrative time, allowing more focus on creative work and client relationships. This efficiency translates to better service quality and higher earning potential.</p>
+        </div>
+        
+        <div class="impact-story">
+          <h4>Entrepreneurship in Creative Economy</h4>
+          <p>Through {{ impactMetrics.entrepreneurshipSupport }} entrepreneurial activities, you're contributing to the growth of the creative economy. Each commission represents a small business transaction that supports independent artists and promotes sustainable livelihoods.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Future Impact Goals -->
+  <div class="goals-section">
+    <h3>Future Impact Goals</h3>
+    <div class="goals-grid">
+      <div class="goal-card">
+        <div class="goal-icon">target</div>
+        <h4>Double Revenue Impact</h4>
+        <p>Increase total revenue contribution to ${{ impactMetrics.totalRevenue * 2 }} within the next year</p>
+        <div class="goal-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 50%"></div>
+          </div>
+          <span class="progress-text">50% Complete</span>
+        </div>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-icon">people</div>
+        <h4>Support More Artists</h4>
+        <p>Expand to support {{ impactMetrics.jobsSupported * 2 }} freelance artists in the creative industry</p>
+        <div class="goal-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 40%"></div>
+          </div>
+          <span class="progress-text">40% Complete</span>
+        </div>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-icon">eco</div>
+        <h4>Sustainable Practices</h4>
+        <p>Implement digital-first workflows to reduce environmental impact by 25%</p>
+        <div class="goal-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 75%"></div>
+          </div>
+          <span class="progress-text">75% Complete</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call to Action -->
+  <div class="cta-section">
+    <div class="cta-content">
+      <h3>Continue Making an Impact</h3>
+      <p>Your art commission management system is making a real difference in supporting SDG 8. Keep growing your business to increase your positive impact on decent work and economic growth.</p>
+      <div class="cta-actions">
+        <a href="/commissions" class="btn btn-primary">Manage More Commissions</a>
+        <a href="/analytics" class="btn btn-outline-primary">View Analytics</a>
+      </div>
+    </div>
+  </div>
+</div>

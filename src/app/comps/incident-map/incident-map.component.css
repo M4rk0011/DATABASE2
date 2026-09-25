@@ -1,0 +1,487 @@
+.incident-map-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.map-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.map-header h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.map-header p {
+  margin: 0;
+  color: #666;
+}
+
+.map-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  height: 600px;
+}
+
+.map-section {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.map-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+  max-width: 200px;
+}
+
+.map-control-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-control-btn:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+}
+
+.control-icon {
+  font-size: 16px;
+  color: #666;
+}
+
+.map-control-btn:hover .control-icon {
+  color: #007bff;
+}
+
+/* Match report-incident leaflet map framing */
+.google-map {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Leaflet appends pins here; severity pin SVG shadow */
+:host ::ng-deep .leaflet-div-icon.incident-map-pin-icon svg {
+  display: block;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+.map-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.map-legend {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  min-width: 120px;
+  max-width: 150px;
+}
+
+.map-legend h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.85em;
+  color: #333;
+  white-space: nowrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 0.8em;
+}
+
+.legend-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-marker.critical {
+  background: #dc3545;
+}
+
+.legend-marker.high {
+  background: #fd7e14;
+}
+
+.legend-marker.medium {
+  background: #ffc107;
+}
+
+.legend-marker.low {
+  background: #28a745;
+}
+
+.details-panel,
+.stats-panel {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-btn:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.panel-content {
+  padding: 20px;
+}
+
+.incident-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.severity-badge,
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+}
+
+.incident-description {
+  margin-bottom: 20px;
+}
+
+.incident-description p {
+  margin: 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.incident-details {
+  margin-bottom: 20px;
+}
+
+.detail-row {
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.detail-row strong {
+  color: #333;
+}
+
+.contact-info,
+.witnesses-info,
+.additional-notes {
+  margin-bottom: 20px;
+}
+
+.contact-info h4,
+.witnesses-info h4,
+.additional-notes h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1em;
+}
+
+.contact-details {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+}
+
+.contact-row {
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.contact-row strong {
+  color: #333;
+}
+
+.witnesses-info ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.witnesses-info li {
+  margin-bottom: 5px;
+}
+
+.additional-notes p {
+  margin: 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.incident-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.incident-actions > .btn {
+  width: 100%;
+}
+
+.action-subpanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0 4px 0;
+  border-top: 1px solid #e9ecef;
+}
+
+.action-subpanel .btn-outline {
+  background: #fff;
+  border: 1px solid #ced4da;
+  color: #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.action-subpanel .btn-outline:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-info:hover {
+  background: #138496;
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #218838;
+}
+
+.stats-panel {
+  padding: 20px;
+}
+
+.stats-panel h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.stat-number {
+  display: block;
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 5px;
+}
+
+.recent-incidents h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1em;
+}
+
+.incident-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.incident-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.incident-item:hover {
+  background: #e9ecef;
+}
+
+.incident-summary {
+  flex: 1;
+}
+
+.incident-title {
+  display: block;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9em;
+}
+
+.incident-time {
+  display: block;
+  color: #666;
+  font-size: 0.8em;
+}
+
+.incident-severity {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7em;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .map-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .map-section {
+    height: 400px;
+  }
+  
+  .details-panel,
+  .stats-panel {
+    height: 400px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

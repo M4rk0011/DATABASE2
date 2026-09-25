@@ -1,0 +1,165 @@
+<div class="incident-map-container">
+  <div class="map-header">
+    <h2>University of Baguio Incident Map</h2>
+    <p>Select an incident or tap a severity-colored pin on the map. The red outline matches the incident report map and shows where reports may be placed.</p>
+  </div>
+
+  <div class="map-layout">
+    <!-- Map Container -->
+    <div class="map-section">
+      <div id="map" class="google-map"></div>
+      <div class="map-loading" *ngIf="!mapInitialized">
+        <div class="loading-spinner"></div>
+        <p>Loading University of Baguio Campus Map...</p>
+      </div>
+      
+    </div>
+
+    <!-- Incident Details Panel -->
+    <div class="details-panel" *ngIf="selectedIncident">
+      <div class="panel-header">
+        <h3>{{ selectedIncident.title }}</h3>
+        <button class="close-btn" (click)="closeIncidentDetails()">×</button>
+      </div>
+      
+      <div class="panel-content">
+        <div class="incident-meta">
+          <span class="severity-badge" [style.background-color]="getSeverityColor(selectedIncident.severity)">
+            {{ selectedIncident.severity.toUpperCase() }}
+          </span>
+          <span class="status-badge" [style.background-color]="getStatusColor(selectedIncident.status)">
+            {{ selectedIncident.status.replace('_', ' ').toUpperCase() }}
+          </span>
+        </div>
+
+        <div class="incident-description">
+          <p>{{ selectedIncident.description }}</p>
+        </div>
+
+        <div class="incident-details">
+          <div class="detail-row">
+            <strong>Category:</strong> {{ selectedIncident.category.replace('_', ' ').toUpperCase() }}
+          </div>
+          <div class="detail-row">
+            <strong>Location:</strong> {{ selectedIncident.location.address }}
+          </div>
+          <div class="detail-row" *ngIf="selectedIncident.location.building">
+            <strong>Building:</strong> {{ selectedIncident.location.building }}
+          </div>
+          <div class="detail-row" *ngIf="selectedIncident.location.floor">
+            <strong>Floor:</strong> {{ selectedIncident.location.floor }}
+          </div>
+          <div class="detail-row" *ngIf="selectedIncident.location.room">
+            <strong>Room:</strong> {{ selectedIncident.location.room }}
+          </div>
+          <div class="detail-row">
+            <strong>Reported:</strong> {{ selectedIncident.reportedAt | date:'medium' }}
+          </div>
+          <div class="detail-row">
+            <strong>Updated:</strong> {{ selectedIncident.updatedAt | date:'medium' }}
+          </div>
+          <div class="detail-row">
+            <strong>Assigned to:</strong> {{ selectedIncident.assignedTo || 'Unassigned' }}
+          </div>
+        </div>
+
+        <div class="contact-info" *ngIf="!selectedIncident.isAnonymous || isAdmin">
+          <h4>Contact Information</h4>
+          <div class="contact-details">
+            <div class="contact-row">
+              <strong>Name:</strong> {{ selectedIncident.contactInfo.name }}
+            </div>
+            <div class="contact-row">
+              <strong>Email:</strong> {{ selectedIncident.contactInfo.email }}
+            </div>
+            <div class="contact-row" *ngIf="selectedIncident.contactInfo.phone">
+              <strong>Phone:</strong> {{ selectedIncident.contactInfo.phone }}
+            </div>
+            <div class="contact-row" *ngIf="selectedIncident.contactInfo.studentId">
+              <strong>Student ID:</strong> {{ selectedIncident.contactInfo.studentId }}
+            </div>
+            <div class="contact-row" *ngIf="selectedIncident.contactInfo.department">
+              <strong>Department:</strong> {{ selectedIncident.contactInfo.department }}
+            </div>
+          </div>
+        </div>
+
+        <div class="witnesses-info" *ngIf="selectedIncident.witnesses.length > 0">
+          <h4>Witnesses</h4>
+          <ul>
+            <li *ngFor="let witness of selectedIncident.witnesses">{{ witness }}</li>
+          </ul>
+        </div>
+
+        <div class="additional-notes" *ngIf="selectedIncident.additionalNotes">
+          <h4>Additional Notes</h4>
+          <p>{{ selectedIncident.additionalNotes }}</p>
+        </div>
+
+        <div class="incident-actions" *ngIf="canManageIncidents()">
+          <button type="button" class="btn btn-primary" (click)="editSelectedIncident()">Edit Incident</button>
+          <button type="button" class="btn btn-info" (click)="toggleStatusPicker()">
+            {{ statusPickerOpen ? 'Hide status options' : 'Update Status' }}
+          </button>
+          <div class="action-subpanel" *ngIf="statusPickerOpen">
+            <button
+              type="button"
+              class="btn btn-outline"
+              *ngFor="let s of incidentStatusOptions"
+              (click)="applyStatus(s)"
+            >
+              Set to {{ formatStatusLabel(s) | uppercase }}
+            </button>
+          </div>
+          <button type="button" class="btn btn-success" (click)="toggleAssignPicker()">
+            {{ assignPickerOpen ? 'Hide assign options' : 'Assign to Staff' }}
+          </button>
+          <div class="action-subpanel" *ngIf="assignPickerOpen">
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('security')">Security team</button>
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('admin')">Administration</button>
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('facilities')">Facilities</button>
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('medical')">Medical / clinic</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Stats Panel -->
+    <div class="stats-panel" *ngIf="!selectedIncident">
+      <h3>Incident Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number">{{ markers.length }}</span>
+          <span class="stat-label">Total Incidents</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getNewReportsCount() }}</span>
+          <span class="stat-label">New Reports</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getCriticalCount() }}</span>
+          <span class="stat-label">Critical</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getResolvedCount() }}</span>
+          <span class="stat-label">Resolved</span>
+        </div>
+      </div>
+
+      <div class="recent-incidents">
+        <h4>Recent Incidents</h4>
+        <div class="incident-list">
+          <div class="incident-item" *ngFor="let marker of markers.slice(0, 5)" (click)="selectIncident(marker.incident)">
+            <div class="incident-summary">
+              <span class="incident-title">{{ marker.incident.title }}</span>
+              <span class="incident-time">{{ marker.incident.reportedAt | date:'short' }}</span>
+            </div>
+            <span class="incident-severity" [style.background-color]="getSeverityColor(marker.incident.severity)">
+              {{ getSeverityInitial(marker.incident.severity) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

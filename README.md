@@ -11,12 +11,17 @@ This project empowers communities to report and track urban incidents efficientl
 👥 Group Members
 
 Balboa, Bryan Dave
+<br><br>
 Ballug, Sean
+<br><br>
 Danioan, Ace
+<br><br>
 Kindipan, Dhaff
+<br><br>
 Vinoya, Derek
+<br><br>
 Yadao, Mark Lloyd
-
+<br><br>
 Last updated: Sep 28, 2026
 
 📌 Features

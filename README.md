@@ -1,4 +1,4 @@
-🌆 Incident Report System – SDG 11
+🌆 Concern Report System – SDG 11
 
 A web-based system for managing and tracking urban incident reports. This application helps communities document urban issues, monitor resolution progress, and maintain a clear and structured reporting system for sustainable cities and communities.
 
@@ -10,11 +10,17 @@ This project empowers communities to report and track urban incidents efficientl
 
 👥 Group Members
 
+Balboa, Bryan Dave
+Ballug, Sean
+Danioan, Ace
+Kindipan, Dhaff
+Vinoya, Derek
+Yadao, Mark Lloyd
 
-Last updated: May 7, 2026
+Last updated: Sep 28, 2026
 
 📌 Features
-Add and manage incident reports
+Add and manage Concern reports
 Track status: Pending, In Progress, Resolved
 Organized reporting system
 Edit and update incident details

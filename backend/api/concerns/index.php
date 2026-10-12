@@ -1,7 +1,7 @@
 <?php
 /**
- * Concern Reports API Endpoint
- * Handles concern report CRUD operations
+ * Concerns API Endpoint
+ * Handles concern CRUD operations
  */
 
 header('Access-Control-Allow-Origin: *');
@@ -20,17 +20,13 @@ switch ($method) {
     case 'GET':
         // Get all concerns or specific concern
         if (isset($_GET['id'])) {
-            $query = "SELECT cr.*, 
-                     CONCAT(u.first_name, ' ', u.last_name) as reported_by_name,
-                     cc.category_name,
-                     l.building_name, l.floor_level, l.room_area,
-                     r.role_name as reporter_role
-                     FROM concern_reports cr
-                     JOIN users u ON cr.user_id = u.user_id
-                     JOIN concern_categories cc ON cr.category_id = cc.category_id
-                     JOIN locations l ON cr.location_id = l.location_id
-                     JOIN roles r ON u.role_id = r.role_id
-                     WHERE cr.report_id = :id LIMIT 1";
+            $query = "SELECT i.*,
+                     u1.username as reported_by_username,
+                     u2.username as assigned_to_username
+                     FROM concerns i
+                     LEFT JOIN users u1 ON i.reported_by = u1.id
+                     LEFT JOIN users u2 ON i.assigned_to = u2.id
+                     WHERE i.id = :id LIMIT 1";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':id', $_GET['id']);
             $stmt->execute();
@@ -49,34 +45,30 @@ switch ($method) {
             $params = [];
 
             if (isset($_GET['category'])) {
-                $where[] = "cc.category_name = :category";
+                $where[] = "category = :category";
                 $params[':category'] = $_GET['category'];
             }
             if (isset($_GET['status'])) {
-                $where[] = "cr.status = :status";
+                $where[] = "status = :status";
                 $params[':status'] = $_GET['status'];
             }
-            if (isset($_GET['user_id'])) {
-                $where[] = "cr.user_id = :user_id";
-                $params[':user_id'] = $_GET['user_id'];
+            if (isset($_GET['reported_by'])) {
+                $where[] = "reported_by = :reported_by";
+                $params[':reported_by'] = $_GET['reported_by'];
             }
             if (isset($_GET['search'])) {
-                $where[] = "(cr.title LIKE :search OR cr.description LIKE :search)";
+                $where[] = "(title LIKE :search OR description LIKE :search OR address LIKE :search)";
                 $params[':search'] = '%' . $_GET['search'] . '%';
             }
 
-            $query = "SELECT cr.*, 
-                     CONCAT(u.first_name, ' ', u.last_name) as reported_by_name,
-                     cc.category_name,
-                     l.building_name, l.floor_level, l.room_area,
-                     r.role_name as reporter_role
-                     FROM concern_reports cr
-                     JOIN users u ON cr.user_id = u.user_id
-                     JOIN concern_categories cc ON cr.category_id = cc.category_id
-                     JOIN locations l ON cr.location_id = l.location_id
-                     JOIN roles r ON u.role_id = r.role_id
+            $query = "SELECT i.*,
+                     u1.username as reported_by_username,
+                     u2.username as assigned_to_username
+                     FROM concerns i
+                     LEFT JOIN users u1 ON i.reported_by = u1.id
+                     LEFT JOIN users u2 ON i.assigned_to = u2.id
                      WHERE " . implode(' AND ', $where) . "
-                     ORDER BY cr.created_at DESC";
+                     ORDER BY i.reported_at DESC";
 
             $stmt = $db->prepare($query);
             foreach ($params as $key => $value) {
@@ -94,7 +86,7 @@ switch ($method) {
         // Create new concern
         $data = json_decode(file_get_contents("php://input"));
 
-        $required_fields = ['title', 'description', 'category', 'severity', 'location_id', 'user_id', 'concern_date'];
+        $required_fields = ['title', 'description', 'category', 'severity', 'latitude', 'longitude', 'address', 'reported_by'];
         foreach ($required_fields as $field) {
             if (empty($data->$field)) {
                 http_response_code(400);
@@ -103,63 +95,79 @@ switch ($method) {
             }
         }
 
-        // Get category_id from category_name
-        $category_query = "SELECT category_id FROM concern_categories WHERE category_name = :category LIMIT 1";
-        $category_stmt = $db->prepare($category_query);
-        $category_stmt->bindParam(':category', $data->category);
-        $category_stmt->execute();
-        $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$category) {
+        // Validate campus boundaries
+        if (!isWithinCampusBounds($data->latitude, $data->longitude)) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid category']);
+            echo json_encode(['success' => false, 'message' => 'Concern location is outside campus boundaries']);
             exit;
         }
 
-        $query = "INSERT INTO concern_reports (user_id, category_id, location_id, title, description, severity, status, concern_date) 
-                  VALUES (:user_id, :category_id, :location_id, :title, :description, :severity, 'pending', :concern_date)";
+        $query = "INSERT INTO concerns (title, description, category, severity, status, latitude, longitude, address, building, floor, room, landmark, reported_by, contact_name, contact_email, contact_phone, contact_student_id, contact_department, additional_notes, is_anonymous, images, witnesses)
+                  VALUES (:title, :description, :category, :severity, 'reported', :latitude, :longitude, :address, :building, :floor, :room, :landmark, :reported_by, :contact_name, :contact_email, :contact_phone, :contact_student_id, :contact_department, :additional_notes, :is_anonymous, :images, :witnesses)";
 
         $stmt = $db->prepare($query);
 
         // Clean and prepare data
         $title = htmlspecialchars(strip_tags($data->title));
         $description = htmlspecialchars(strip_tags($data->description));
+        $category = $data->category;
         $severity = $data->severity;
-        $location_id = $data->location_id;
-        $user_id = $data->user_id;
-        $category_id = $category['category_id'];
-        $concern_date = $data->concern_date;
+        $latitude = $data->latitude;
+        $longitude = $data->longitude;
+        $address = htmlspecialchars(strip_tags($data->address));
+        $building = !empty($data->building) ? htmlspecialchars(strip_tags($data->building)) : null;
+        $floor = !empty($data->floor) ? htmlspecialchars(strip_tags($data->floor)) : null;
+        $room = !empty($data->room) ? htmlspecialchars(strip_tags($data->room)) : null;
+        $landmark = !empty($data->landmark) ? htmlspecialchars(strip_tags($data->landmark)) : null;
+        $reported_by = $data->reported_by;
+        $contact_name = !empty($data->contactInfo->name) ? htmlspecialchars(strip_tags($data->contactInfo->name)) : null;
+        $contact_email = !empty($data->contactInfo->email) ? htmlspecialchars(strip_tags($data->contactInfo->email)) : null;
+        $contact_phone = !empty($data->contactInfo->phone) ? htmlspecialchars(strip_tags($data->contactInfo->phone)) : null;
+        $contact_student_id = !empty($data->contactInfo->studentId) ? htmlspecialchars(strip_tags($data->contactInfo->studentId)) : null;
+        $contact_department = !empty($data->contactInfo->department) ? htmlspecialchars(strip_tags($data->contactInfo->department)) : null;
+        $additional_notes = !empty($data->additionalNotes) ? htmlspecialchars(strip_tags($data->additionalNotes)) : null;
+        $is_anonymous = isset($data->isAnonymous) ? (bool)$data->isAnonymous : false;
+        $images = !empty($data->images) ? json_encode($data->images) : json_encode([]);
+        $witnesses = !empty($data->witnesses) ? json_encode($data->witnesses) : json_encode([]);
 
         $stmt->bindParam(':title', $title);
         $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':category', $category);
         $stmt->bindParam(':severity', $severity);
-        $stmt->bindParam(':location_id', $location_id);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':category_id', $category_id);
-        $stmt->bindParam(':concern_date', $concern_date);
+        $stmt->bindParam(':latitude', $latitude);
+        $stmt->bindParam(':longitude', $longitude);
+        $stmt->bindParam(':address', $address);
+        $stmt->bindParam(':building', $building);
+        $stmt->bindParam(':floor', $floor);
+        $stmt->bindParam(':room', $room);
+        $stmt->bindParam(':landmark', $landmark);
+        $stmt->bindParam(':reported_by', $reported_by);
+        $stmt->bindParam(':contact_name', $contact_name);
+        $stmt->bindParam(':contact_email', $contact_email);
+        $stmt->bindParam(':contact_phone', $contact_phone);
+        $stmt->bindParam(':contact_student_id', $contact_student_id);
+        $stmt->bindParam(':contact_department', $contact_department);
+        $stmt->bindParam(':additional_notes', $additional_notes);
+        $stmt->bindParam(':is_anonymous', $is_anonymous, PDO::PARAM_BOOL);
+        $stmt->bindParam(':images', $images);
+        $stmt->bindParam(':witnesses', $witnesses);
 
         if ($stmt->execute()) {
             $concern_id = $db->lastInsertId();
-            
+
             // Fetch the created concern
-            $query = "SELECT cr.*, 
-                     CONCAT(u.first_name, ' ', u.last_name) as reported_by_name,
-                     cc.category_name,
-                     l.building_name, l.floor_level, l.room_area,
-                     r.role_name as reporter_role
-                     FROM concern_reports cr
-                     JOIN users u ON cr.user_id = u.user_id
-                     JOIN concern_categories cc ON cr.category_id = cc.category_id
-                     JOIN locations l ON cr.location_id = l.location_id
-                     JOIN roles r ON u.role_id = r.role_id
-                     WHERE cr.report_id = :id LIMIT 1";
+            $query = "SELECT i.*, u1.username as reported_by_username, u2.username as assigned_to_username
+                     FROM concerns i
+                     LEFT JOIN users u1 ON i.reported_by = u1.id
+                     LEFT JOIN users u2 ON i.assigned_to = u2.id
+                     WHERE i.id = :id LIMIT 1";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':id', $concern_id);
             $stmt->execute();
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             $concern = formatConcern($row);
-            
+
             http_response_code(201);
             echo json_encode(['success' => true, 'concern' => $concern]);
         } else {
@@ -174,7 +182,7 @@ switch ($method) {
 
         if (!empty($data->id)) {
             // Check if concern exists
-            $check_query = "SELECT report_id FROM concern_reports WHERE report_id = :id LIMIT 1";
+            $check_query = "SELECT id FROM concerns WHERE id = :id LIMIT 1";
             $check_stmt = $db->prepare($check_query);
             $check_stmt->bindParam(':id', $data->id);
             $check_stmt->execute();
@@ -197,6 +205,10 @@ switch ($method) {
                 $update_fields[] = "description = :description";
                 $params[':description'] = htmlspecialchars(strip_tags($data->description));
             }
+            if (isset($data->category)) {
+                $update_fields[] = "category = :category";
+                $params[':category'] = $data->category;
+            }
             if (isset($data->severity)) {
                 $update_fields[] = "severity = :severity";
                 $params[':severity'] = $data->severity;
@@ -204,22 +216,41 @@ switch ($method) {
             if (isset($data->status)) {
                 $update_fields[] = "status = :status";
                 $params[':status'] = $data->status;
-            }
-            if (isset($data->category)) {
-                $category_query = "SELECT category_id FROM concern_categories WHERE category_name = :category LIMIT 1";
-                $category_stmt = $db->prepare($category_query);
-                $category_stmt->bindParam(':category', $data->category);
-                $category_stmt->execute();
-                $category = $category_stmt->fetch(PDO::FETCH_ASSOC);
                 
-                if ($category) {
-                    $update_fields[] = "category_id = :category_id";
-                    $params[':category_id'] = $category['category_id'];
+                // Set resolved_at if status is resolved
+                if ($data->status === 'resolved') {
+                    $update_fields[] = "resolved_at = NOW()";
                 }
             }
-            if (isset($data->location_id)) {
-                $update_fields[] = "location_id = :location_id";
-                $params[':location_id'] = $data->location_id;
+            if (isset($data->assignedTo)) {
+                $update_fields[] = "assigned_to = :assigned_to";
+                $params[':assigned_to'] = $data->assignedTo;
+            }
+            if (isset($data->contactInfo)) {
+                if (isset($data->contactInfo->name)) {
+                    $update_fields[] = "contact_name = :contact_name";
+                    $params[':contact_name'] = htmlspecialchars(strip_tags($data->contactInfo->name));
+                }
+                if (isset($data->contactInfo->email)) {
+                    $update_fields[] = "contact_email = :contact_email";
+                    $params[':contact_email'] = htmlspecialchars(strip_tags($data->contactInfo->email));
+                }
+                if (isset($data->contactInfo->phone)) {
+                    $update_fields[] = "contact_phone = :contact_phone";
+                    $params[':contact_phone'] = htmlspecialchars(strip_tags($data->contactInfo->phone));
+                }
+            }
+            if (isset($data->additionalNotes)) {
+                $update_fields[] = "additional_notes = :additional_notes";
+                $params[':additional_notes'] = htmlspecialchars(strip_tags($data->additionalNotes));
+            }
+            if (isset($data->images)) {
+                $update_fields[] = "images = :images";
+                $params[':images'] = json_encode($data->images);
+            }
+            if (isset($data->witnesses)) {
+                $update_fields[] = "witnesses = :witnesses";
+                $params[':witnesses'] = json_encode($data->witnesses);
             }
 
             if (empty($update_fields)) {
@@ -228,7 +259,7 @@ switch ($method) {
                 exit;
             }
 
-            $query = "UPDATE concern_reports SET " . implode(', ', $update_fields) . " WHERE report_id = :id";
+            $query = "UPDATE concerns SET " . implode(', ', $update_fields) . " WHERE id = :id";
             $params[':id'] = $data->id;
 
             $stmt = $db->prepare($query);
@@ -238,24 +269,18 @@ switch ($method) {
 
             if ($stmt->execute()) {
                 // Fetch updated concern
-                $query = "SELECT cr.*, 
-                         CONCAT(u.first_name, ' ', u.last_name) as reported_by_name,
-                         cc.category_name,
-                         l.building_name, l.floor_level, l.room_area,
-                         r.role_name as reporter_role
-                         FROM concern_reports cr
-                         JOIN users u ON cr.user_id = u.user_id
-                         JOIN concern_categories cc ON cr.category_id = cc.category_id
-                         JOIN locations l ON cr.location_id = l.location_id
-                         JOIN roles r ON u.role_id = r.role_id
-                         WHERE cr.report_id = :id LIMIT 1";
+                $query = "SELECT i.*, u1.username as reported_by_username, u2.username as assigned_to_username
+                         FROM concerns i
+                         LEFT JOIN users u1 ON i.reported_by = u1.id
+                         LEFT JOIN users u2 ON i.assigned_to = u2.id
+                         WHERE i.id = :id LIMIT 1";
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(':id', $data->id);
                 $stmt->execute();
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                
+
                 $concern = formatConcern($row);
-                
+
                 echo json_encode(['success' => true, 'concern' => $concern]);
             } else {
                 http_response_code(500);
@@ -270,7 +295,7 @@ switch ($method) {
     case 'DELETE':
         // Delete concern
         if (isset($_GET['id'])) {
-            $query = "DELETE FROM concern_reports WHERE report_id = :id";
+            $query = "DELETE FROM concerns WHERE id = :id";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':id', $_GET['id']);
 
@@ -294,22 +319,49 @@ switch ($method) {
 
 function formatConcern($row) {
     return [
-        'id' => $row['report_id'],
+        'id' => $row['id'],
         'title' => $row['title'],
         'description' => $row['description'],
-        'category' => $row['category_name'],
+        'category' => $row['category'],
         'severity' => $row['severity'],
         'status' => $row['status'],
         'location' => [
-            'id' => $row['location_id'],
-            'building' => $row['building_name'],
-            'floor' => $row['floor_level'],
-            'room' => $row['room_area']
+            'latitude' => (float)$row['latitude'],
+            'longitude' => (float)$row['longitude'],
+            'address' => $row['address'],
+            'building' => $row['building'],
+            'floor' => $row['floor'],
+            'room' => $row['room'],
+            'landmark' => $row['landmark']
         ],
-        'reportedBy' => $row['reported_by_name'],
-        'reporterRole' => $row['reporter_role'],
-        'concernDate' => $row['concern_date'],
-        'createdAt' => $row['created_at']
+        'reportedBy' => $row['reported_by_username'] ?? $row['reported_by'],
+        'reportedAt' => $row['reported_at'],
+        'updatedAt' => $row['updated_at'],
+        'resolvedAt' => $row['resolved_at'],
+        'assignedTo' => $row['assigned_to_username'] ?? $row['assigned_to'],
+        'images' => json_decode($row['images'] ?? '[]', true) ?: [],
+        'witnesses' => json_decode($row['witnesses'] ?? '[]', true) ?: [],
+        'contactInfo' => [
+            'name' => $row['contact_name'],
+            'email' => $row['contact_email'],
+            'phone' => $row['contact_phone'],
+            'studentId' => $row['contact_student_id'],
+            'department' => $row['contact_department']
+        ],
+        'additionalNotes' => $row['additional_notes'],
+        'isAnonymous' => (bool)$row['is_anonymous']
     ];
+}
+
+function isWithinCampusBounds($latitude, $longitude) {
+    $southwest = [16.414543, 120.595925];
+    $northeast = [16.416568, 120.599075];
+
+    return (
+        $latitude >= $southwest[0] &&
+        $latitude <= $northeast[0] &&
+        $longitude >= $southwest[1] &&
+        $longitude <= $northeast[1]
+    );
 }
 ?>

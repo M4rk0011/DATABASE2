@@ -1,7 +1,7 @@
 {
-  "name": "appdev1-sdg8-artComQue",
+  "name": "ub-concern-report-system",
   "version": "1.0.0",
-  "description": "A web-based system for managing and tracking art commissions supporting SDG 8",
+  "description": "A web-based system for managing and tracking concern reports mapping for University of Baguio",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

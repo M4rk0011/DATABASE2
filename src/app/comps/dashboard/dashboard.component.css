@@ -86,7 +86,7 @@
 .stats-section,
 .admin-stats,
 .user-management,
-.recent-incidents,
+.recent-concerns,
 .quick-actions {
   background: white;
   border-radius: 12px;
@@ -97,7 +97,7 @@
 .stats-section h2,
 .admin-stats h2,
 .user-management h2,
-.recent-incidents h2,
+.recent-concerns h2,
 .quick-actions h2 {
   margin: 0 0 20px 0;
   color: #333;
@@ -218,13 +218,13 @@
   color: #333;
 }
 
-.incidents-list {
+.concerns-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.incident-card {
+.concern-card {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
@@ -233,24 +233,24 @@
   border-left: 4px solid #007bff;
 }
 
-.incident-card:hover {
+.concern-card:hover {
   background: #e9ecef;
 }
 
-.incident-header {
+.concern-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 10px;
 }
 
-.incident-header h3 {
+.concern-header h3 {
   margin: 0;
   color: #333;
   font-size: 1.1em;
 }
 
-.incident-badges {
+.concern-badges {
   display: flex;
   gap: 8px;
 }
@@ -265,16 +265,16 @@
   color: white;
 }
 
-.incident-content {
+.concern-content {
   color: #666;
 }
 
-.incident-description {
+.concern-description {
   margin: 0 0 10px 0;
   line-height: 1.4;
 }
 
-.incident-meta {
+.concern-meta {
   display: flex;
   gap: 20px;
   font-size: 0.9em;
@@ -457,7 +457,7 @@
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .incident-meta {
+  .concern-meta {
     flex-direction: column;
     gap: 5px;
   }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { User, UserRole } from '../models/incident.model';
+import { User, UserRole } from '../models/concern.model';
 
 @Injectable({
   providedIn: 'root'

@@ -1,0 +1,165 @@
+<div class="concern-map-container">
+  <div class="map-header">
+    <h2>University of Baguio Incident Map</h2>
+    <p>Select an concern or tap a severity-colored pin on the map. The red outline matches the concern report map and shows where reports may be placed.</p>
+  </div>
+
+  <div class="map-layout">
+    <!-- Map Container -->
+    <div class="map-section">
+      <div id="map" class="google-map"></div>
+      <div class="map-loading" *ngIf="!mapInitialized">
+        <div class="loading-spinner"></div>
+        <p>Loading University of Baguio Campus Map...</p>
+      </div>
+      
+    </div>
+
+    <!-- Incident Details Panel -->
+    <div class="details-panel" *ngIf="selectedConcern">
+      <div class="panel-header">
+        <h3>{{ selectedConcern.title }}</h3>
+        <button class="close-btn" (click)="closeConcernDetails()">×</button>
+      </div>
+      
+      <div class="panel-content">
+        <div class="concern-meta">
+          <span class="severity-badge" [style.background-color]="getSeverityColor(selectedConcern.severity)">
+            {{ selectedConcern.severity.toUpperCase() }}
+          </span>
+          <span class="status-badge" [style.background-color]="getStatusColor(selectedConcern.status)">
+            {{ selectedConcern.status.replace('_', ' ').toUpperCase() }}
+          </span>
+        </div>
+
+        <div class="concern-description">
+          <p>{{ selectedConcern.description }}</p>
+        </div>
+
+        <div class="concern-details">
+          <div class="detail-row">
+            <strong>Category:</strong> {{ selectedConcern.category.replace('_', ' ').toUpperCase() }}
+          </div>
+          <div class="detail-row">
+            <strong>Location:</strong> {{ selectedConcern.location.address }}
+          </div>
+          <div class="detail-row" *ngIf="selectedConcern.location.building">
+            <strong>Building:</strong> {{ selectedConcern.location.building }}
+          </div>
+          <div class="detail-row" *ngIf="selectedConcern.location.floor">
+            <strong>Floor:</strong> {{ selectedConcern.location.floor }}
+          </div>
+          <div class="detail-row" *ngIf="selectedConcern.location.room">
+            <strong>Room:</strong> {{ selectedConcern.location.room }}
+          </div>
+          <div class="detail-row">
+            <strong>Reported:</strong> {{ selectedConcern.reportedAt | date:'medium' }}
+          </div>
+          <div class="detail-row">
+            <strong>Updated:</strong> {{ selectedConcern.updatedAt | date:'medium' }}
+          </div>
+          <div class="detail-row">
+            <strong>Assigned to:</strong> {{ selectedConcern.assignedTo || 'Unassigned' }}
+          </div>
+        </div>
+
+        <div class="contact-info" *ngIf="!selectedConcern.isAnonymous || isAdmin">
+          <h4>Contact Information</h4>
+          <div class="contact-details">
+            <div class="contact-row">
+              <strong>Name:</strong> {{ selectedConcern.contactInfo.name }}
+            </div>
+            <div class="contact-row">
+              <strong>Email:</strong> {{ selectedConcern.contactInfo.email }}
+            </div>
+            <div class="contact-row" *ngIf="selectedConcern.contactInfo.phone">
+              <strong>Phone:</strong> {{ selectedConcern.contactInfo.phone }}
+            </div>
+            <div class="contact-row" *ngIf="selectedConcern.contactInfo.studentId">
+              <strong>Student ID:</strong> {{ selectedConcern.contactInfo.studentId }}
+            </div>
+            <div class="contact-row" *ngIf="selectedConcern.contactInfo.department">
+              <strong>Department:</strong> {{ selectedConcern.contactInfo.department }}
+            </div>
+          </div>
+        </div>
+
+        <div class="witnesses-info" *ngIf="selectedConcern.witnesses.length > 0">
+          <h4>Witnesses</h4>
+          <ul>
+            <li *ngFor="let witness of selectedConcern.witnesses">{{ witness }}</li>
+          </ul>
+        </div>
+
+        <div class="additional-notes" *ngIf="selectedConcern.additionalNotes">
+          <h4>Additional Notes</h4>
+          <p>{{ selectedConcern.additionalNotes }}</p>
+        </div>
+
+        <div class="concern-actions" *ngIf="canManageConcerns()">
+          <button type="button" class="btn btn-primary" (click)="editSelectedConcern()">Edit Incident</button>
+          <button type="button" class="btn btn-info" (click)="toggleStatusPicker()">
+            {{ statusPickerOpen ? 'Hide status options' : 'Update Status' }}
+          </button>
+          <div class="action-subpanel" *ngIf="statusPickerOpen">
+            <button
+              type="button"
+              class="btn btn-outline"
+              *ngFor="let s of concernStatusOptions"
+              (click)="applyStatus(s)"
+            >
+              Set to {{ formatStatusLabel(s) | uppercase }}
+            </button>
+          </div>
+          <button type="button" class="btn btn-success" (click)="toggleAssignPicker()">
+            {{ assignPickerOpen ? 'Hide assign options' : 'Assign to Staff' }}
+          </button>
+          <div class="action-subpanel" *ngIf="assignPickerOpen">
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('security')">Security team</button>
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('admin')">Administration</button>
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('facilities')">Facilities</button>
+            <button type="button" class="btn btn-outline" (click)="assignToStaff('medical')">Medical / clinic</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Stats Panel -->
+    <div class="stats-panel" *ngIf="!selectedConcern">
+      <h3>Incident Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-number">{{ markers.length }}</span>
+          <span class="stat-label">Total Incidents</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getNewReportsCount() }}</span>
+          <span class="stat-label">New Reports</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getCriticalCount() }}</span>
+          <span class="stat-label">Critical</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getResolvedCount() }}</span>
+          <span class="stat-label">Resolved</span>
+        </div>
+      </div>
+
+      <div class="recent-concerns">
+        <h4>Recent Incidents</h4>
+        <div class="concern-list">
+          <div class="concern-item" *ngFor="let marker of markers.slice(0, 5)" (click)="selectConcern(marker.concern)">
+            <div class="concern-summary">
+              <span class="concern-title">{{ marker.concern.title }}</span>
+              <span class="concern-time">{{ marker.concern.reportedAt | date:'short' }}</span>
+            </div>
+            <span class="concern-severity" [style.background-color]="getSeverityColor(marker.concern.severity)">
+              {{ getSeverityInitial(marker.concern.severity) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -82,6 +82,41 @@ CREATE TABLE IF NOT EXISTS concern_reports (
     INDEX idx_concern_date (concern_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- CONCERNS table (for the API)
+CREATE TABLE IF NOT EXISTS concerns (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    severity ENUM('low', 'medium', 'high', 'critical') NOT NULL,
+    status ENUM('reported', 'investigating', 'resolved', 'closed', 'false_alarm') NOT NULL DEFAULT 'reported',
+    latitude DECIMAL(10, 8) NOT NULL,
+    longitude DECIMAL(11, 8) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    building VARCHAR(100),
+    floor VARCHAR(50),
+    room VARCHAR(100),
+    landmark VARCHAR(255),
+    reported_by VARCHAR(100) NOT NULL,
+    contact_name VARCHAR(100),
+    contact_email VARCHAR(100),
+    contact_phone VARCHAR(20),
+    contact_student_id VARCHAR(50),
+    contact_department VARCHAR(100),
+    additional_notes TEXT,
+    is_anonymous BOOLEAN DEFAULT FALSE,
+    images JSON,
+    witnesses JSON,
+    assigned_to VARCHAR(100),
+    reported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    INDEX idx_status (status),
+    INDEX idx_severity (severity),
+    INDEX idx_category (category),
+    INDEX idx_reported_by (reported_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- REPORT_ATTACHMENTS table
 CREATE TABLE IF NOT EXISTS report_attachments (
     attachment_id INT AUTO_INCREMENT PRIMARY KEY,

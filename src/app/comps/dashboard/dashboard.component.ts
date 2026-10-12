@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { IncidentService } from '../../services/incident.service';
-import { User, UserRole } from '../../models/incident.model';
+import { ConcernService } from '../../services/concern.service';
+import { User, UserRole } from '../../models/concern.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +16,7 @@ import { User, UserRole } from '../../models/incident.model';
 export class DashboardComponent implements OnInit {
   currentUser: User | null = null;
   stats: any = {};
-  recentIncidents: any[] = [];
+  recentConcerns: any[] = [];
   users: User[] = [];
   editingUserId: string | null = null;
   editUserForm = {
@@ -37,7 +37,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private incidentService: IncidentService,
+    private concernService: ConcernService,
     private router: Router
   ) {}
 
@@ -61,9 +61,9 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadAdminData() {
-    this.stats = this.incidentService.getAdminStats();
-    this.incidentService.getIncidents().subscribe(incidents => {
-      this.recentIncidents = incidents
+    this.stats = this.concernService.getAdminStats();
+    this.concernService.getConcerns().subscribe(concerns => {
+      this.recentConcerns = concerns
         .sort((a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime())
         .slice(0, 5);
     });
@@ -72,13 +72,13 @@ export class DashboardComponent implements OnInit {
 
   private loadUserData() {
     if (this.currentUser) {
-      this.incidentService.getIncidentsByReporter(this.currentUser.id).subscribe(incidents => {
+      this.concernService.getConcernsByReporter(this.currentUser.id).subscribe(concerns => {
         this.stats = {
-          totalIncidents: incidents.length,
-          openIncidents: incidents.filter(i => i.status === 'reported').length,
-          resolvedIncidents: incidents.filter(i => i.status === 'resolved').length
+          totalConcerns: concerns.length,
+          openConcerns: concerns.filter(i => i.status === 'reported').length,
+          resolvedConcerns: concerns.filter(i => i.status === 'resolved').length
         };
-        this.recentIncidents = incidents
+        this.recentConcerns = concerns
           .sort((a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime())
           .slice(0, 5);
       });
@@ -111,11 +111,11 @@ export class DashboardComponent implements OnInit {
     return colors[status] || '#6c757d';
   }
 
-  viewIncident(incidentId: string) {
-    this.router.navigate(['/incidents', incidentId]);
+  viewConcern(concernId: string) {
+    this.router.navigate(['/concerns', concernId]);
   }
 
-  createIncident() {
+  createConcern() {
     this.router.navigate(['/report']);
   }
 
@@ -131,8 +131,8 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  viewAllIncidents() {
-    this.router.navigate(['/incidents']);
+  viewAllConcerns() {
+    this.router.navigate(['/concerns']);
   }
 
   isAdmin(): boolean {

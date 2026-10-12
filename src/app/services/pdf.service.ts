@@ -1,20 +1,20 @@
 import { Injectable } from '@angular/core';
-import { Incident } from '../models/incident.model';
+import { Concern } from '../models/concern.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PdfService {
 
-  generateIncidentPDF(incident: Incident): void {
+  generateConcernPDF(concern: Concern): void {
     try {
-      const printContent = this.createIncidentPrintContent(incident);
+      const printContent = this.createConcernPrintContent(concern);
       const printWindow = window.open('', '_blank', 'width=800,height=600');
-      
+
       if (printWindow) {
         printWindow.document.write(printContent);
         printWindow.document.close();
-        
+
         // Wait for content to load, then print
         printWindow.onload = () => {
           setTimeout(() => {
@@ -27,7 +27,7 @@ export class PdfService {
         };
       } else {
         console.error('Failed to open print window. Please allow popups for this site.');
-        alert('Please allow popups for this site to print incident reports.');
+        alert('Please allow popups for this site to print concern reports.');
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -35,18 +35,18 @@ export class PdfService {
     }
   }
 
-  downloadIncidentPDF(incident: Incident): void {
-    console.log('Opening incident report in new window for:', incident.id);
-    
+  downloadConcernPDF(concern: Concern): void {
+    console.log('Opening concern report in new window for:', concern.id);
+
     // Simple window approach - always works
     try {
-      const printContent = this.createIncidentPrintContent(incident);
+      const printContent = this.createConcernPrintContent(concern);
       const newWindow = window.open('', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
-      
+
       if (newWindow) {
         newWindow.document.write(printContent);
         newWindow.document.close();
-        
+
         // Add download instructions
         setTimeout(() => {
           const instructions = newWindow.document.createElement('div');
@@ -65,7 +65,7 @@ export class PdfService {
           `;
           instructions.innerHTML = `
             <h4 style="margin: 0 0 10px 0; font-size: 16px;">📄 Save This Report</h4>
-            <p style="margin: 0 0 10px 0; font-size: 14px;">Press <strong>Ctrl+S</strong> or right-click and select "Save As..." to download this incident report.</p>
+            <p style="margin: 0 0 10px 0; font-size: 14px;">Press <strong>Ctrl+S</strong> or right-click and select "Save As..." to download this concern report.</p>
             <button onclick="window.close()" style="
               background: white;
               color: #007bff;
@@ -88,29 +88,29 @@ export class PdfService {
           `;
           newWindow.document.body.appendChild(instructions);
         }, 500);
-        
-        console.log('Incident report opened in new window');
-        alert('Incident report opened in new window! Use Ctrl+S to save or Print button to print.');
-        
+
+        console.log('Concern report opened in new window');
+        alert('Concern report opened in new window! Use Ctrl+S to save or Print button to print.');
+
       } else {
-        alert('Please allow popups for this site to view incident reports.');
+        alert('Please allow popups for this site to view concern reports.');
       }
     } catch (error) {
-      console.error('Error opening incident report:', error);
-      alert('Unable to open incident report. Please check your popup settings.');
+      console.error('Error opening concern report:', error);
+      alert('Unable to open concern report. Please check your popup settings.');
     }
   }
 
-  private createIncidentPrintContent(incident: Incident): string {
+  private createConcernPrintContent(concern: Concern): string {
     const currentDate = new Date().toLocaleDateString();
-    const severityColor = this.getSeverityColor(incident.severity);
-    const statusColor = this.getStatusColor(incident.status);
+    const severityColor = this.getSeverityColor(concern.severity);
+    const statusColor = this.getStatusColor(concern.status);
 
     return `
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Incident Report - ${incident.id}</title>
+    <title>Concern Report - ${concern.id}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -135,7 +135,7 @@ export class PdfService {
             color: #666;
             font-size: 14px;
         }
-        .incident-info {
+        .concern-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
@@ -211,32 +211,32 @@ export class PdfService {
 <body>
     <div class="header">
         <h1>UNIVERSITY OF BAGUIO</h1>
-        <p>Incident Report System</p>
-        <p><strong>Incident Report #${incident.id}</strong></p>
+        <p>Concern Report System</p>
+        <p><strong>Concern Report #${concern.id}</strong></p>
     </div>
 
-    <div class="incident-info">
+    <div class="concern-info">
         <div class="info-section">
-            <h3>Incident Details</h3>
+            <h3>Concern Details</h3>
             <div class="info-item">
                 <span class="info-label">Title:</span>
-                <span class="info-value">${incident.title}</span>
+                <span class="info-value">${concern.title}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Severity:</span>
                 <span class="info-value">
-                    <span class="severity-badge">${incident.severity.toUpperCase()}</span>
+                    <span class="severity-badge">${concern.severity.toUpperCase()}</span>
                 </span>
             </div>
             <div class="info-item">
                 <span class="info-label">Status:</span>
                 <span class="info-value">
-                    <span class="status-badge">${incident.status.replace('_', ' ').toUpperCase()}</span>
+                    <span class="status-badge">${concern.status.replace('_', ' ').toUpperCase()}</span>
                 </span>
             </div>
             <div class="info-item">
                 <span class="info-label">Reported Date:</span>
-                <span class="info-value">${new Date(incident.reportedAt).toLocaleDateString()}</span>
+                <span class="info-value">${new Date(concern.reportedAt).toLocaleDateString()}</span>
             </div>
         </div>
 
@@ -244,44 +244,44 @@ export class PdfService {
             <h3>Location Information</h3>
             <div class="info-item">
                 <span class="info-label">Address:</span>
-                <span class="info-value">${incident.location.address}</span>
+                <span class="info-value">${concern.location.address}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Coordinates:</span>
-                <span class="info-value">${incident.location.latitude.toFixed(6)}, ${incident.location.longitude.toFixed(6)}</span>
+                <span class="info-value">${concern.location.latitude.toFixed(6)}, ${concern.location.longitude.toFixed(6)}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Building/Area:</span>
-                <span class="info-value">${incident.location.building || 'N/A'}</span>
+                <span class="info-value">${concern.location.building || 'N/A'}</span>
             </div>
         </div>
     </div>
 
     <div class="description-section">
-        <h3>Incident Description</h3>
+        <h3>Concern Description</h3>
         <div class="description-text">
-            ${incident.description}
+            ${concern.description}
         </div>
     </div>
 
-    <div class="incident-info">
+    <div class="concern-info">
         <div class="info-section">
             <h3>Reporter Information</h3>
             <div class="info-item">
                 <span class="info-label">Name:</span>
-                <span class="info-value">${incident.contactInfo.name}</span>
+                <span class="info-value">${concern.contactInfo.name}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Email:</span>
-                <span class="info-value">${incident.contactInfo.email}</span>
+                <span class="info-value">${concern.contactInfo.email}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Phone:</span>
-                <span class="info-value">${incident.contactInfo.phone || 'N/A'}</span>
+                <span class="info-value">${concern.contactInfo.phone || 'N/A'}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Department:</span>
-                <span class="info-value">${incident.contactInfo.department || 'N/A'}</span>
+                <span class="info-value">${concern.contactInfo.department || 'N/A'}</span>
             </div>
         </div>
 
@@ -289,14 +289,14 @@ export class PdfService {
             <h3>Assigned To</h3>
             <div class="info-item">
                 <span class="info-label">Staff:</span>
-                <span class="info-value">${incident.assignedTo || 'Unassigned'}</span>
+                <span class="info-value">${concern.assignedTo || 'Unassigned'}</span>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <p>Generated on ${currentDate} | University of Baguio Incident Report System</p>
-        <p>This is an official incident report document</p>
+        <p>Generated on ${currentDate} | University of Baguio Concern Report System</p>
+        <p>This is an official concern report document</p>
     </div>
 </body>
 </html>`;
@@ -323,15 +323,15 @@ export class PdfService {
     return colors[status] || '#6c757d';
   }
 
-  private openIncidentInWindow(incident: Incident): void {
+  private openConcernInWindow(concern: Concern): void {
     try {
-      const printContent = this.createIncidentPrintContent(incident);
+      const printContent = this.createConcernPrintContent(concern);
       const newWindow = window.open('', '_blank', 'width=800,height=600');
-      
+
       if (newWindow) {
         newWindow.document.write(printContent);
         newWindow.document.close();
-        
+
         // Add download instructions
         setTimeout(() => {
           const instructions = document.createElement('div');
@@ -343,8 +343,8 @@ export class PdfService {
           `;
           newWindow.document.body.appendChild(instructions);
         }, 1000);
-        
-        console.log('Opened incident in new window for manual download');
+
+        console.log('Opened concern in new window for manual download');
       }
     } catch (error) {
       console.error('Window approach also failed:', error);
@@ -352,19 +352,19 @@ export class PdfService {
     }
   }
 
-  shareIncidentReport(incident: Incident): void {
+  shareConcernReport(concern: Concern): void {
     try {
-      const reportContent = this.createIncidentPrintContent(incident);
-      const subject = `Incident Report #${incident.id} - ${incident.title}`;
-      const body = `Please find the incident report attached or view it below:\n\nTitle: ${incident.title}\nSeverity: ${incident.severity}\nStatus: ${incident.status}\nLocation: ${incident.location.address}\n\nFull report details are available in the attachment.`;
-      
+      const reportContent = this.createConcernPrintContent(concern);
+      const subject = `Concern Report #${concern.id} - ${concern.title}`;
+      const body = `Please find the concern report attached or view it below:\n\nTitle: ${concern.title}\nSeverity: ${concern.severity}\nStatus: ${concern.status}\nLocation: ${concern.location.address}\n\nFull report details are available in the attachment.`;
+
       // Create mailto link
       const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      
+
       window.open(mailtoLink, '_blank');
-      console.log('Email client opened for sharing incident report');
+      console.log('Email client opened for sharing concern report');
     } catch (error) {
-      console.error('Error sharing incident report:', error);
+      console.error('Error sharing concern report:', error);
       alert('Failed to open email client. Please try again.');
     }
   }

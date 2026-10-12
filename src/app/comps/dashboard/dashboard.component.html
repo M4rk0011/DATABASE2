@@ -6,7 +6,7 @@
         <p>{{ currentUser.role === UserRole.ADMIN ? 'Administrator' : currentUser.role === UserRole.SECURITY ? 'Security Officer' : 'Student' }}</p>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" *ngIf="!isAdmin()" (click)="createIncident()">Report Incident</button>
+        <button class="btn btn-primary" *ngIf="!isAdmin()" (click)="createConcern()">Report Incident</button>
         <button class="btn btn-outline" (click)="viewMap()">View Map</button>
         <button class="btn btn-outline" *ngIf="isAdmin()" (click)="goToUserManagement()">User Management</button>
         <button class="btn btn-danger" (click)="logout()">Logout</button>
@@ -68,7 +68,7 @@
         <div class="admin-card">
           <h3>Incidents by Category</h3>
           <div class="category-stats">
-            <div class="category-item" *ngFor="let item of stats.incidentsByCategory | keyvalue">
+            <div class="category-item" *ngFor="let item of stats.concernsByCategory | keyvalue">
               <span class="category-name">{{ getCategoryDisplayName(item.key) }}</span>
               <span class="category-count">{{ item.value }}</span>
             </div>
@@ -78,7 +78,7 @@
         <div class="admin-card">
           <h3>Incidents by Severity</h3>
           <div class="severity-stats">
-            <div class="severity-item" *ngFor="let item of stats.incidentsBySeverity | keyvalue">
+            <div class="severity-item" *ngFor="let item of stats.concernsBySeverity | keyvalue">
               <span class="severity-dot" [style.background-color]="getSeverityColorFromKey(item.key)"></span>
               <span class="severity-name">{{ getSeverityDisplayName(item.key) }}</span>
               <span class="severity-count">{{ item.value }}</span>
@@ -95,7 +95,7 @@
             </div>
             <div class="metric-item">
               <span class="metric-label">This Month:</span>
-              <span class="metric-value">{{ stats.incidentsThisMonth }} incidents</span>
+              <span class="metric-value">{{ stats.concernsThisMonth }} concerns</span>
             </div>
           </div>
         </div>
@@ -158,39 +158,39 @@
     </div>
 
     <!-- Recent Incidents -->
-    <div class="recent-incidents">
+    <div class="recent-concerns">
       <div class="section-header">
         <h2>Recent Incidents</h2>
-        <button class="btn btn-outline" (click)="viewAllIncidents()">View All</button>
+        <button class="btn btn-outline" (click)="viewAllConcerns()">View All</button>
       </div>
 
-      <div class="incidents-list" *ngIf="recentIncidents.length > 0">
-        <div class="incident-card" *ngFor="let incident of recentIncidents" (click)="viewIncident(incident.id)">
-          <div class="incident-header">
-            <h3>{{ incident.title }}</h3>
-            <div class="incident-badges">
-              <span class="severity-badge" [style.background-color]="getSeverityColor(incident.severity)">
-                {{ incident.severity.toUpperCase() }}
+      <div class="concerns-list" *ngIf="recentConcerns.length > 0">
+        <div class="concern-card" *ngFor="let concern of recentConcerns" (click)="viewConcern(concern.id)">
+          <div class="concern-header">
+            <h3>{{ concern.title }}</h3>
+            <div class="concern-badges">
+              <span class="severity-badge" [style.background-color]="getSeverityColor(concern.severity)">
+                {{ concern.severity.toUpperCase() }}
               </span>
-              <span class="status-badge" [style.background-color]="getStatusColor(incident.status)">
-                {{ incident.status.replace('_', ' ').toUpperCase() }}
+              <span class="status-badge" [style.background-color]="getStatusColor(concern.status)">
+                {{ concern.status.replace('_', ' ').toUpperCase() }}
               </span>
             </div>
           </div>
           
-          <div class="incident-content">
-            <p class="incident-description">{{ incident.description }}</p>
-            <div class="incident-meta">
-              <span class="location">Location: {{ incident.location.address }}</span>
-              <span class="date">Reported: {{ incident.reportedAt | date:'medium' }}</span>
+          <div class="concern-content">
+            <p class="concern-description">{{ concern.description }}</p>
+            <div class="concern-meta">
+              <span class="location">Location: {{ concern.location.address }}</span>
+              <span class="date">Reported: {{ concern.reportedAt | date:'medium' }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="recentIncidents.length === 0">
-        <p>No incidents reported yet.</p>
-        <button class="btn btn-primary" *ngIf="!isAdmin()" (click)="createIncident()">Report First Incident</button>
+      <div class="empty-state" *ngIf="recentConcerns.length === 0">
+        <p>No concerns reported yet.</p>
+        <button class="btn btn-primary" *ngIf="!isAdmin()" (click)="createConcern()">Report First Incident</button>
       </div>
     </div>
 
@@ -198,12 +198,12 @@
     <div class="quick-actions">
       <h2>Quick Actions</h2>
       <div class="actions-grid">
-        <div class="action-card" *ngIf="!isAdmin()" (click)="createIncident()">
+        <div class="action-card" *ngIf="!isAdmin()" (click)="createConcern()">
           <div class="action-icon">
             <span class="icon">add_circle</span>
           </div>
           <h3>Report New Incident</h3>
-          <p>Submit a new incident report</p>
+          <p>Submit a new concern report</p>
         </div>
 
         <div class="action-card" (click)="viewMap()">
@@ -211,15 +211,15 @@
             <span class="icon">map</span>
           </div>
           <h3>View Incident Map</h3>
-          <p>See incidents on campus map</p>
+          <p>See concerns on campus map</p>
         </div>
 
-        <div class="action-card" (click)="viewAllIncidents()">
+        <div class="action-card" (click)="viewAllConcerns()">
           <div class="action-icon">
             <span class="icon">list</span>
           </div>
           <h3>All Incidents</h3>
-          <p>Browse all incident reports</p>
+          <p>Browse all concern reports</p>
         </div>
 
         <div class="action-card" *ngIf="isAdmin()" (click)="loadUsers()">

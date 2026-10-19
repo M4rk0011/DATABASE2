@@ -1,0 +1,277 @@
+:where(.page-report) .report-concern-container{
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+:where(.page-report) .report-header{
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+:where(.page-report) .report-header h1{
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+:where(.page-report) .report-header p{
+  margin: 0;
+  color: #666;
+  font-size: 1.1em;
+}
+
+:where(.page-report) .concern-form{
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+:where(.page-report) .form-section{
+  padding: 30px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+:where(.page-report) .form-section:last-child{
+  border-bottom: none;
+}
+
+:where(.page-report) .form-section h2{
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.3em;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #007bff;
+}
+
+:where(.page-report) .form-group{
+  margin-bottom: 20px;
+}
+
+:where(.page-report) .form-group label{
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+:where(.page-report) .form-group input, :where(.page-report) .form-group textarea, :where(.page-report) .form-group select{
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+:where(.page-report) .form-group input:focus, :where(.page-report) .form-group textarea:focus, :where(.page-report) .form-group select:focus{
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+:where(.page-report) .form-group textarea{
+  resize: vertical;
+  min-height: 80px;
+}
+
+:where(.page-report) .form-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+:where(.page-report) .checkbox-label{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+:where(.page-report) .checkbox-label input[type="checkbox"]{
+  width: auto;
+  margin: 0;
+}
+
+:where(.page-report) .quick-locations{
+  margin-bottom: 20px;
+}
+
+:where(.page-report) .quick-locations label{
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+:where(.page-report) .location-buttons{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+:where(.page-report) .map-section{
+  margin-top: 24px;
+}
+
+:where(.page-report) .map-label{
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+:where(.page-report) .map-hint{
+  margin: 0 0 12px 0;
+  font-size: 0.95em;
+  color: #555;
+  line-height: 1.4;
+}
+
+:where(.page-report) .report-leaflet-map{
+  width: 100%;
+  height: 320px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  z-index: 1;
+}
+
+:where(.page-report) .coordinates-readout{
+  margin: 10px 0 0 0;
+  font-size: 0.9em;
+  color: #444;
+  font-variant-numeric: tabular-nums;
+}
+
+:where(.page-report) .witness-input-group{
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+:where(.page-report) .witness-input-group input{
+  flex: 1;
+}
+
+:where(.page-report) .witnesses-list{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+:where(.page-report) .witness-item{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+:where(.page-report) .btn-remove{
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:where(.page-report) .btn-remove:hover{
+  background: #c82333;
+}
+
+:where(.page-report) .form-actions{
+  padding: 30px;
+  background: #f8f9fa;
+}
+
+:where(.page-report) .error-message{
+  background: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+:where(.page-report) .success-message{
+  background: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+:where(.page-report) .action-buttons{
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+:where(.page-report) .btn{
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+:where(.page-report) .btn-primary{
+  background: #007bff;
+  color: white;
+}
+
+:where(.page-report) .btn-primary:hover:not(:disabled){
+  background: #0056b3;
+}
+
+:where(.page-report) .btn-primary:disabled{
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+:where(.page-report) .btn-outline{
+  background: transparent;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+:where(.page-report) .btn-outline:hover{
+  background: #007bff;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  :where(.page-report) .form-row{
+    grid-template-columns: 1fr;
+  }
+  
+  :where(.page-report) .location-buttons{
+    flex-direction: column;
+  }
+  
+  :where(.page-report) .witness-input-group{
+    flex-direction: column;
+  }
+  
+  :where(.page-report) .action-buttons{
+    flex-direction: column;
+  }
+  
+  :where(.page-report) .btn{
+    width: 100%;
+  }
+}

@@ -1,0 +1,230 @@
+:where(.page-concerns) .concern-list-container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+:where(.page-concerns) .page-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+:where(.page-concerns) .page-header h2{
+  margin: 0;
+  color: #333;
+}
+
+:where(.page-concerns) .btn{
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+:where(.page-concerns) .btn-primary{
+  background: #007bff;
+  color: white;
+}
+
+:where(.page-concerns) .btn-primary:hover{
+  background: #0056b3;
+}
+
+:where(.page-concerns) .btn-outline-primary{
+  background: transparent;
+  color: #007bff;
+  border: 2px solid #007bff;
+}
+
+:where(.page-concerns) .btn-outline-primary:hover{
+  background: #007bff;
+  color: white;
+}
+
+:where(.page-concerns) .btn-danger{
+  background: #dc3545;
+  color: white;
+}
+
+:where(.page-concerns) .btn-danger:hover{
+  background: #c82333;
+}
+
+:where(.page-concerns) .filters-section{
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+:where(.page-concerns) .filter-row{
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+}
+
+:where(.page-concerns) .filter-group{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+:where(.page-concerns) .filter-group label{
+  font-weight: bold;
+  color: #333;
+}
+
+:where(.page-concerns) .filter-group input, :where(.page-concerns) .filter-group select{
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+:where(.page-concerns) .loading-state{
+  text-align: center;
+  padding: 60px;
+  color: #666;
+}
+
+:where(.page-concerns) .concerns-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+:where(.page-concerns) .concern-card{
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+:where(.page-concerns) .concern-card:hover{
+  transform: translateY(-2px);
+}
+
+:where(.page-concerns) .card-header{
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+:where(.page-concerns) .card-header h3{
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.1em;
+}
+
+:where(.page-concerns) .concern-badges{
+  display: flex;
+  gap: 8px;
+}
+
+:where(.page-concerns) .severity-badge, :where(.page-concerns) .status-badge{
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+}
+
+:where(.page-concerns) .card-content{
+  padding: 20px;
+}
+
+:where(.page-concerns) .concern-description{
+  margin: 0 0 15px 0;
+  color: #666;
+  line-height: 1.4;
+}
+
+:where(.page-concerns) .concern-details{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:where(.page-concerns) .detail-item{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+:where(.page-concerns) .detail-item .label{
+  color: #666;
+  font-weight: bold;
+}
+
+:where(.page-concerns) .detail-item .value{
+  color: #333;
+}
+
+:where(.page-concerns) .card-actions{
+  padding: 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+:where(.page-concerns) .status-actions{
+  margin-left: auto;
+}
+
+:where(.page-concerns) .status-select{
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background: white;
+}
+
+:where(.page-concerns) .empty-state{
+  text-align: center;
+  padding: 60px;
+  color: #666;
+}
+
+:where(.page-concerns) .empty-state p{
+  margin: 0 0 20px 0;
+  font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+  :where(.page-concerns) .page-header{
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  :where(.page-concerns) .filter-row{
+    grid-template-columns: 1fr;
+  }
+  
+  :where(.page-concerns) .concerns-grid{
+    grid-template-columns: 1fr;
+  }
+  
+  :where(.page-concerns) .card-actions{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  :where(.page-concerns) .status-actions{
+    margin-left: 0;
+  }
+}

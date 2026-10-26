@@ -1,7 +1,8 @@
 <?php
 require __DIR__.'/bootstrap.php';
 $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
-if(!users()){header('Location: setup.php');exit;}
+// No web installer: import database.sql manually in phpMyAdmin.
+users();
 $currentUser=isset($_SESSION['user_id'])?findUser($_SESSION['user_id']):null;
 $page=is_string($_GET['page']??null)?$_GET['page']:'login';
 $page=['incidents'=>'concerns','incident-map'=>'map','report-incident'=>'report'][$page]??$page;
@@ -11,6 +12,7 @@ $categories=['theft','vandalism','harassment','accident','medical','fire','secur
 $severities=['low','medium','high','critical'];$statuses=['reported','investigating','resolved','closed','false_alarm'];$concernStatusOptions=$statuses;
 $errorMessage='';$successMessage=$_SESSION['flash']??'';unset($_SESSION['flash']);
 require __DIR__.'/actions.php';
+if($currentUser && $page==='login')go('dashboard');
 if(!$currentUser && !in_array($page,['login','register'],true))go('login');
 $allConcerns=reports();$concerns=$allConcerns;
 $searchTerm=is_string($_GET['search']??null)?$_GET['search']:'';$statusFilter=is_string($_GET['statusFilter']??null)?$_GET['statusFilter']:'';$severityFilter=is_string($_GET['severityFilter']??null)?$_GET['severityFilter']:'';

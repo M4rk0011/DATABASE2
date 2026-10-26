@@ -36,6 +36,9 @@
           <p><?= e($concern->description) ?></p>
         </div>
 
+        <?php if ($concern->images): ?><section class="concern-description"><h3>Attached photos</h3><div class="photo-gallery">
+<?php foreach ($concern->images as $photo): ?><a href="<?= e(photoUrl($concern->id, $photo)) ?>" target="_blank" rel="noopener"><img src="<?= e(photoUrl($concern->id, $photo)) ?>" alt="Attached concern photo" loading="lazy"></a><?php endforeach; ?>
+</div></section><?php endif; ?>
         <div class="concern-info">
           <div class="info-grid">
             <div class="info-item">

@@ -1,6 +1,7 @@
 <?php
 if ($_SERVER['REQUEST_METHOD']==='POST') {
  try {
+    if (empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0)>0) throw new RuntimeException('Upload exceeds the server request limit. Use photos under 2 MB each and set post_max_size to 16M in php.ini.');
     if (!hash_equals($_SESSION['csrf'],post('csrf'))) { http_response_code(403);throw new RuntimeException('Session expired. Reload this page and try again.'); }
     $action=post('action');
     if($action==='login') {
@@ -48,11 +49,11 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         $r->location=obj(['latitude'=>$lat,'longitude'=>$lng]);foreach(['address','building','floor','room','landmark'] as $k)$r->location->$k=post($k);
         $r->contactInfo=obj(['name'=>$anon?'Anonymous':post('contactName'),'email'=>$anon?'anonymous@ub.edu.ph':post('contactEmail'),'phone'=>$anon?'':post('contactPhone'),'studentId'=>$anon?'':post('studentId'),'department'=>$anon?'':post('department')]);
         $w=$_POST['witnesses']??[];if(!is_array($w))throw new RuntimeException('Invalid witnesses.');
-        $r->witnesses=array_values(array_filter(array_map(fn($s)=>is_string($s)?trim($s):'',array_slice($w,0,100))));$r->isAnonymous=$anon;$r->updatedAt=date(DATE_ATOM);saveReport($r);
+        $r->witnesses=array_values(array_filter(array_map(fn($s)=>is_string($s)?trim($s):'',array_slice($w,0,100))));$r->isAnonymous=$anon;$r->updatedAt=date(DATE_ATOM);saveReportWithPhotos($r);
         $_SESSION['flash']='Report saved successfully.';go('details',['id'=>$r->id]);
     }
     $r=findReport(post('id'));if(!$r)throw new RuntimeException('Report not found.');
-    if($action==='delete-report') {demand(isAdmin());db()->prepare('DELETE FROM php_reports WHERE id=?')->execute([$r->id]);go('concerns');}
+    if($action==='delete-report') {demand(isAdmin());db()->prepare('DELETE FROM php_reports WHERE id=?')->execute([$r->id]);foreach($r->images as $photo)deletePhoto($photo);go('concerns');}
     if($action==='status') {
         demand(canUpdateStatus());if(!in_array(post('value'),$statuses,true))throw new RuntimeException('Invalid status.');
         $r->status=post('value');if($r->status==='resolved')$r->resolvedAt=date(DATE_ATOM);elseif($r->status!=='closed')$r->resolvedAt='';

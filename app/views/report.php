@@ -4,7 +4,7 @@
     <p>Fill in the details below to report a concern at University of Baguio</p>
   </div>
 
-  <form class="concern-form" method="post"><?php csrf_field(); ?><input type="hidden" name="action" value="save-report">
+  <form class="concern-form" method="post" enctype="multipart/form-data"><?php csrf_field(); ?><input type="hidden" name="action" value="save-report">
     
     <div class="form-section">
       <h2>Concern Details</h2>
@@ -157,6 +157,20 @@
     </div>
 
     
+    <div class="form-section">
+      <h2>Photos</h2>
+      <label for="photos">Attach photos of the concern</label>
+      <p id="photo-help">JPG, PNG or WebP. Maximum 5 photos per report, 2 MB each. Select multiple photos together. After an error, select your new photos again.</p>
+      <input id="photos" type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="photo-help">
+      <p id="photo-error" role="alert"></p><div id="photo-preview" class="photo-gallery"></div>
+      <div class="photo-gallery">
+      <?php foreach (($concernData->images ?? []) as $photo): ?>
+        <label class="photo-card"><img src="<?= e(photoUrl($concernData->id, $photo)) ?>" alt="Attached concern photo" loading="lazy">
+        <span><input type="checkbox" name="removePhotos[]" value="<?= e($photo) ?>"> Remove photo</span></label>
+      <?php endforeach; ?>
+      </div>
+    </div>
+
     <div class="form-section">
       <h2>Additional Information</h2>
       

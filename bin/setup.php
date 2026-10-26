@@ -1,6 +1,11 @@
 <?php
 require __DIR__.'/../app/bootstrap.php';
 if (PHP_SAPI !== 'cli') exit;
+// CLI fixture installer, never reachable through the website.
+if(getenv('APP_SQLITE_PATH')) {
+ db()->exec('CREATE TABLE IF NOT EXISTS php_users (id VARCHAR(40) PRIMARY KEY, username VARCHAR(100) NOT NULL UNIQUE, email VARCHAR(200) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL, body TEXT NOT NULL)');
+ db()->exec('CREATE TABLE IF NOT EXISTS php_reports (id VARCHAR(40) PRIMARY KEY, body TEXT NOT NULL)');
+}
 $demo=in_array('--demo',$argv,true);
 if ($demo) {
  foreach(json_decode(file_get_contents(__DIR__.'/../app/seed-users.json')) as $u)if(!findUser($u->id))saveUser($u,$u->password);

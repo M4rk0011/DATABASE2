@@ -41,18 +41,54 @@ if(mapElement){
  const reset=document.createElement('button');reset.type='button';reset.className='btn btn-outline';reset.textContent='Center campus';reset.onclick=()=>map.fitBounds(bounds,{padding:[24,24]});
  const retry=document.createElement('button');retry.type='button';retry.className='btn btn-outline';retry.textContent='Retry online map';
  const notice=document.createElement('span');notice.className='map-status';notice.setAttribute('role','status');toolbar.append(select,reset,retry,notice);mapElement.before(toolbar);
- const sources={street:['tile.php?provider=street&z={z}&x={x}&y={y}','© OpenStreetMap contributors'],alternate:['tile.php?provider=alternate&z={z}&x={x}&y={y}','© OpenStreetMap contributors © CARTO'],satellite:['tile.php?provider=satellite&z={z}&x={x}&y={y}','Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics and the GIS User Community']};
- let currentLayer,tileTimer,layerVersion=0;
- function background(kind,automatic=false){const version=++layerVersion;clearTimeout(tileTimer);if(currentLayer)map.removeLayer(currentLayer);select.value=kind;mapElement.dataset.background=kind;
-  if(kind==='offline'){currentLayer=new Grid({attribution:'Coordinate grid only — not aerial imagery',maxZoom:19}).addTo(map);notice.textContent=automatic?'Online imagery unavailable. Offline grid active; pins and location selection still work.':'Offline coordinate grid — pins use real latitude/longitude.';return;}
-  notice.textContent='Loading map background…';let loaded=0,errors=0;const source=sources[kind];
-  const fallback=()=>{if(version!==layerVersion||loaded)return;background(kind==='street'?'alternate':'offline',true);};
-  currentLayer=L.tileLayer(source[0],{attribution:source[1],maxZoom:19});
-  currentLayer.on('tileload',()=>{if(version!==layerVersion)return;loaded++;clearTimeout(tileTimer);notice.textContent=kind==='satellite'?'Satellite imagery':'Street map';});
-  currentLayer.on('tileerror',()=>{if(version!==layerVersion)return;if(++errors>=3&&!loaded){clearTimeout(tileTimer);tileTimer=setTimeout(fallback,800);}});
-  currentLayer.addTo(map);tileTimer=setTimeout(fallback,15000);
+ // MAP_BACKGROUND_START: each request cycle must finish, not merely its first tile.
+ const sources={
+  esri:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',label:'Esri street map',credit:'Tiles © Esri — Source: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), OpenStreetMap contributors and the GIS User Community',nativeZoom:18},
+  osm:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',label:'OpenStreetMap',credit:'© OpenStreetMap contributors',nativeZoom:19},
+  carto:{url:'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',label:'CARTO street map',credit:'© OpenStreetMap contributors © CARTO',nativeZoom:19},
+  satellite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',label:'Satellite imagery',credit:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics and the GIS User Community',nativeZoom:19}
+ };
+ const routes={street:['esri','osm','carto','satellite'],alternate:['carto','osm','esri','satellite'],satellite:['satellite']};
+ let currentLayer,tileTimer,layerVersion=0,requestedKind='street';
+ // Always retain a local background while online tiles are loading.
+ const grid=new Grid({attribution:'Coordinate grid when imagery is unavailable',maxZoom:19}).addTo(map);
+ function background(kind,attempt=0){
+  const version=++layerVersion;clearTimeout(tileTimer);
+  if(currentLayer){map.removeLayer(currentLayer);currentLayer=null;}
+  if(attempt===0)requestedKind=kind;
+  if(kind==='offline'){
+   select.value='offline';mapElement.dataset.background='offline';
+   notice.textContent='Offline coordinate grid — no street imagery. Pins remain usable.';return;
+  }
+  const route=routes[kind];const provider=route[attempt];
+  if(!provider){
+   select.value='offline';mapElement.dataset.background='offline';
+   notice.textContent='Map providers could not be reached. Showing coordinate grid only. Check internet access, then Retry online map.';return;
+  }
+  const source=sources[provider];select.value=provider==='satellite'?'satellite':kind;
+  mapElement.dataset.background=provider==='satellite'?'satellite':kind;
+  mapElement.dataset.provider=provider;
+  const prefix=provider==='satellite'&&kind!=='satellite'?'Street providers unavailable; showing satellite. ':attempt?'Backup provider: ':'';
+  notice.textContent=prefix+'Loading '+source.label+'…';
+  let loaded=0,errors=0,settled=false;
+  const next=()=>{if(version!==layerVersion)return;clearTimeout(tileTimer);background(kind,attempt+1);};
+  const armTimer=()=>{clearTimeout(tileTimer);tileTimer=setTimeout(()=>{if(version!==layerVersion||settled)return;next();},15000);};
+  const layer=L.tileLayer(source.url,{attribution:source.credit,maxZoom:19,maxNativeZoom:source.nativeZoom,bounds:bounds.pad(1),updateWhenIdle:true,noWrap:true});
+  currentLayer=layer;
+  layer.on('loading',()=>{if(version!==layerVersion)return;loaded=0;errors=0;settled=false;armTimer();});
+  layer.on('tileload',()=>{if(version!==layerVersion)return;loaded++;});
+  layer.on('tileerror',()=>{if(version!==layerVersion)return;errors++;});
+  layer.on('load',()=>{
+   if(version!==layerVersion)return;settled=true;clearTimeout(tileTimer);
+   if(errors||!loaded){next();return;}
+   notice.textContent=prefix+source.label+' loaded. Click or drag to explore.';
+  });
+  layer.addTo(map);if(!settled)armTimer();
  }
- select.onchange=()=>background(select.value);retry.onclick=()=>background('street');background('street');
+ select.onchange=()=>background(select.value);
+ retry.onclick=()=>background(requestedKind==='offline'?'street':requestedKind);
+ background('street');
+ // MAP_BACKGROUND_END
  L.rectangle(bounds,{color:'#dc3545',weight:2,opacity:.95,fillOpacity:.06}).addTo(map);
  if(mapElement.id==='report-map'){
   const lat=q('[name=latitude]'),lng=q('[name=longitude]');let initial=L.latLng(Number(lat.value)||16.4155555556,Number(lng.value)||120.5975);if(!bounds.contains(initial))initial=bounds.getCenter();const marker=L.marker(initial,{draggable:true}).addTo(map);
@@ -62,6 +98,18 @@ if(mapElement){
   const colors={critical:'#dc3545',high:'#fd7e14',medium:'#ffc107',low:'#28a745'};
   for(const r of app.reports){const marker=L.marker([r.location.latitude,r.location.longitude],{icon:L.divIcon({className:'concern-map-pin-icon',html:`<span class="concern-map-pin-dot" style="background:${colors[r.severity]||'#6c757d'}"></span>`,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);const label=document.createElement('span');label.textContent=r.title;marker.bindTooltip(label);marker.on('click',()=>navigate('map',r.id));if(app.selected===r.id){map.setView(marker.getLatLng(),18);marker.openTooltip();}}
  }
- const resize=new ResizeObserver(()=>map.invalidateSize());resize.observe(mapElement);setTimeout(()=>map.invalidateSize(),200);
+ if(window.ResizeObserver){const resize=new ResizeObserver(()=>map.invalidateSize());resize.observe(mapElement);}setTimeout(()=>map.invalidateSize(),200);
  }
 }
+
+const photos=q('#photos');
+let previewURLs=[];
+photos?.addEventListener('change',()=>{
+ for(const url of previewURLs)URL.revokeObjectURL(url);previewURLs=[];
+ const preview=q('#photo-preview');preview.replaceChildren();
+ const files=Array.from(photos.files);
+ const error=files.length>5?'Select at most 5 photos.':files.some(f=>!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>2*1024*1024)?'Use JPG, PNG or WebP photos under 2 MB each.':'';
+ q('#photo-error').textContent=error;photos.setCustomValidity(error);
+ if(error)return;
+ for(const file of files){const img=document.createElement('img');const url=URL.createObjectURL(file);previewURLs.push(url);img.src=url;img.alt='Preview: '+file.name;preview.append(img);}
+});

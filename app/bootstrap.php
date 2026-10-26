@@ -20,10 +20,10 @@ function db(): PDO {
     $dsn = getenv('DB_DSN') ?: (getenv('APP_SQLITE_PATH') ? 'sqlite:'.$path : ($config['dsn'] ?? 'mysql:host=127.0.0.1;dbname=concern_report_system;charset=utf8mb4'));
     $db = new PDO($dsn, getenv('DB_USER') ?: ($config['user'] ?? 'root'), getenv('DB_PASSWORD') ?: ($config['password'] ?? ''), [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);
     if (str_starts_with($dsn,'sqlite:')) $db->exec('PRAGMA busy_timeout=5000');
-    $db->exec('CREATE TABLE IF NOT EXISTS php_users (id VARCHAR(40) PRIMARY KEY, username VARCHAR(100) NOT NULL UNIQUE, email VARCHAR(200) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL, body TEXT NOT NULL)');
-    $db->exec('CREATE TABLE IF NOT EXISTS php_reports (id VARCHAR(40) PRIMARY KEY, body TEXT NOT NULL)');
+    // Import database.sql manually; web requests never create tables.
     return $db;
 }
+require_once __DIR__.'/photos.php';
 function obj(array $a): object { return json_decode(json_encode($a, JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR); }
 function e($value): string { return htmlspecialchars((string)($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function url(string $page, array $args=[]): string { return 'index.php?'.http_build_query(['page'=>$page]+$args); }

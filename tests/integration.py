@@ -51,6 +51,7 @@ with tempfile.TemporaryDirectory() as temp:
   student=Client();student.login('student','student123');admin=Client();admin.login('admin','admin123');security=Client();security.login('security','security123')
   for p in ['dashboard','concerns','details&id=1','map','map&id=1','home','analytics','sdg-impact','dashboard&editUser=3']:
    check('Render '+p,admin.request(p)[0]==200)
+  check('Studio excluded from dashboard and registration',all('crew-canvas' not in admin.request(page)[1] and 'crew-game.js' not in admin.request(page)[1] for page in ['dashboard','register']))
   report={'action':'save-report','title':'Integration <script>alert(1)</script>','description':'Description','category':'facility','severity':'high','address':'Main Library','latitude':'16.41555','longitude':'120.5975','contactName':'Maria','contactEmail':'student@ub.edu.ph','witnesses[]':['Witness A','Witness B'],'additionalNotes':'Notes'}
   status,text,url=student.request('report',report);rid=urllib.parse.parse_qs(urllib.parse.urlparse(url).query)['id'][0]
   check('Create report and escape HTML','&lt;script&gt;' in text and 'Witness B' in text)

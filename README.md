@@ -62,3 +62,11 @@ Do not expose app/, bin/, storage/, tests/, database.sql or config.php through a
 Street view now starts with Esri (the same host as satellite), followed by OpenStreetMap and CARTO if a provider fails. Alternate view tries CARTO, OpenStreetMap, then Esri. If all street sources fail, satellite is shown with an explicit notice. If no provider responds, a labeled coordinate grid remains available. Partial tile failures and stalled tile requests now trigger recovery, including after zooming or panning. Esri street tiles use native zoom 18 and scale at zoom 19.
 
 **Existing installation:** back up then replace only `public/app.js` and `app/layout.php` with the copies in this archive. Press Ctrl+F5 in the browser. No SQL import or database change is needed for this map update. Keep your existing config.php and storage/uploads.
+
+## Walkable team studio
+
+The login/index page includes a 3D team studio. It is not loaded on the dashboard or other portal pages. Click **Enter the studio**, use WASD to walk, drag to look, and approach a character to read their contribution. Mobile visitors can hold the on-screen movement buttons. Escape or **Pause / Exit** releases the game controls.
+
+The studio uses local WebGL geometry with rounded avatars, lighting, floor shadows, and a furnished interior. Select **Performance** if **High** graphics feels slow. If WebGL is unavailable, the text team credits remain accessible. No database changes or external assets are required.
+
+Developer checks: `node tests/crew-game.cjs` exercises movement and lifecycle behavior; `python tests/crew-shaders.py` optionally compiles and links the lighting shaders on Linux with Mesa EGL.

@@ -5,18 +5,25 @@
       <form class="login-form" method="post"><?php csrf_field(); ?><input type="hidden" name="action" value="login">
         <div class="form-group">
           <label for="username">Username</label>
-          <input type="text" id="username" value="<?= e($loginData->username) ?>" name="username" placeholder="Enter your username" autocomplete="username" required>
+          <input type="text" id="username" value="<?= e($loginData->username) ?>" name="username" placeholder="Enter your username" autocomplete="username" <?= $errorMessage ? 'aria-describedby="login-error"' : '' ?> required>
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
           <div class="password-input">
-            <input type="<?= e(($showPassword ? 'text' : 'password')) ?>" id="password" value="<?= e($loginData->password) ?>" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <input type="<?= e(($showPassword ? 'text' : 'password')) ?>" id="password" value="<?= e($loginData->password) ?>" name="password" placeholder="Enter your password" autocomplete="current-password" <?= $errorMessage ? 'aria-describedby="login-error"' : '' ?> required>
             <button type="button" class="toggle-password" data-password="password">
               <?= e(($showPassword ? 'Hide' : 'Show')) ?>
             </button>
           </div>
         </div>
+
+        <?php if ($errorMessage): ?>
+        <div class="login-feedback" id="login-error" role="alert" tabindex="-1" autofocus>
+          <span class="login-feedback-icon" aria-hidden="true">!</span>
+          <div><strong>Unable to sign in</strong><p><?= e($errorMessage) ?></p></div>
+        </div>
+        <?php endif; ?>
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" <?= $isLoading ? 'disabled' : '' ?>>
@@ -24,9 +31,7 @@
           </button>
         </div>
 
-        <?php if ($errorMessage): ?><div class="error-message">
-          <?= e($errorMessage) ?>
-        </div><?php endif; ?>
+
       </form>
 
 <div class="login-footer"><p>New to the portal? <a href="<?= e(url('register')) ?>">Create an account</a></p></div><div class="auth-note">For students, administrators &amp; campus security</div></section>

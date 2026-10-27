@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>University of Baguio Concern Report System</title>
 <link rel="stylesheet" href="css/styles.css"><link rel="stylesheet" href="css/enhancements.css?v=4"><link rel="stylesheet" href="css/shell.css"><link rel="stylesheet" href="css/<?= e($pages[$page]) ?>.css">
-<link rel="stylesheet" href="vendor/leaflet/leaflet.css"><link rel="stylesheet" href="css/redesign.css?v=3">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css"><link rel="stylesheet" href="css/redesign.css?v=4">
 <style>[hidden]{display:none!important} [data-href]{cursor:pointer} .app-message{margin:1rem;padding:1rem;border:1px solid #198754;background:#eefaf3;color:#16442c}.app-error{border-color:#dc3545;background:#fff2f2;color:#842029}@media print{.main-nav,.page-header,.header-actions,.quick-actions,.status-actions,.app-message{display:none!important}.concern-content{display:block!important}.sidebar{display:none!important}body{background:white!important}}@media(max-width:480px){.page-dashboard .stats-grid,.page-dashboard .actions-grid{grid-template-columns:minmax(0,1fr)}.page-dashboard .section-header{flex-wrap:wrap;gap:12px}.page-dashboard .user-main{min-width:0;overflow-wrap:anywhere}}
 </style>
 </head><body class="ui-redesign <?= in_array($page,['login','register'],true)?'auth-page':'portal-page' ?>">
@@ -16,8 +16,9 @@
 <?php endif; ?>
 <main class="main-content <?= $currentUser?'authenticated':'' ?>" data-ui-shell>
 <?php if($successMessage): ?><div class="app-message" role="status"><?= e($successMessage) ?></div><?php endif; ?>
-<?php if($errorMessage): ?><div class="app-message app-error" role="alert"><?= e($errorMessage) ?></div><?php endif; ?>
+<?php if($errorMessage && $page!=='login'): ?><div class="app-message app-error" role="alert"><?= e($errorMessage) ?></div><?php endif; ?>
 <div class="page-<?= e($page) ?>"><?php require __DIR__.'/views/'.$page.'.php'; ?></div>
+<?php if(in_array($page,['login','dashboard'],true)) require __DIR__.'/views/team.php'; ?>
 </main></div><footer></footer>
 <script type="application/json" id="app-data"><?= json_encode(['page'=>$page,'csrf'=>$_SESSION['csrf'],'reports'=>array_map(function($r){return ['id'=>$r->id,'title'=>$r->title,'severity'=>$r->severity,'location'=>['latitude'=>$r->location->latitude,'longitude'=>$r->location->longitude]];},$page==='map'?$allConcerns:[]),'selected'=>$selectedConcern->id??null], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?></script>
 <script src="vendor/leaflet/leaflet.js"></script>

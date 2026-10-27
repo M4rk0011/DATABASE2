@@ -44,7 +44,7 @@ with tempfile.TemporaryDirectory() as temp:
   _,failed,_=guest.request('login',{'action':'login','username':'student','password':'wrong-secret'})
   check('Login error shown once inside form',failed.count('Invalid username or password.')==1 and failed.index('class="login-form"')<failed.index('id="login-error"')<failed.index('</form>'))
   check('Failed login keeps username, clears password','value="student"' in failed and 'wrong-secret' not in failed and 'app-message app-error' not in failed)
-  check('Team credits and motion control rendered','Mark Lloyd Yadao' in failed and 'Bryan Dave Balboa' in failed and 'id="team-pause"' in failed)
+  check('Team credits and playable studio rendered','Mark Lloyd Yadao' in failed and 'Bryan Dave Balboa' in failed and 'id="crew-start"' in failed and 'id="crew-canvas"' in failed and 'team-card' not in failed)
   guest.request('register');d={'action':'register','firstName':'Test','lastName':'Student','username':'test-user','email':'test@example.com','password':'test1234','confirmPassword':'test1234'}
   check('Registration','Account created' in guest.request('register',d)[1]);check('Duplicate account rejected','already exists' in guest.request('register',d)[1])
   guest.login('test-user','test1234');check('New account persists',True)
